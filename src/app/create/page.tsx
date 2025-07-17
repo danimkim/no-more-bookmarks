@@ -1,27 +1,38 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { ArrowLeft, Upload, X } from "lucide-react"
-import Link from "next/link"
-import { useState } from "react"
-import Image from "next/image"
+import { Button } from "@/src/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/src/components/ui/card";
+import { Input } from "@/src/components/ui/input";
+import { Label } from "@/src/components/ui/label";
+import { Textarea } from "@/src/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/src/components/ui/select";
+import { ArrowLeft, Upload, X } from "lucide-react";
+import Link from "next/link";
+import { useState } from "react";
+import Image from "next/image";
 
 export default function CreatePostPage() {
-  const [selectedImages, setSelectedImages] = useState<string[]>([])
+  const [selectedImages, setSelectedImages] = useState<string[]>([]);
   const [formData, setFormData] = useState({
     title: "",
     originalLink: "",
     content: "",
     publishedDate: "",
     category: "",
-  })
+  });
 
   const categories = [
     "Art & Culture",
@@ -35,25 +46,27 @@ export default function CreatePostPage() {
     "Entertainment",
     "Sports",
     "Other",
-  ]
+  ];
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files
+    const files = event.target.files;
     if (files) {
-      const newImages = Array.from(files).map((file) => URL.createObjectURL(file))
-      setSelectedImages((prev) => [...prev, ...newImages])
+      const newImages = Array.from(files).map((file) =>
+        URL.createObjectURL(file)
+      );
+      setSelectedImages((prev) => [...prev, ...newImages]);
     }
-  }
+  };
 
   const removeImage = (index: number) => {
-    setSelectedImages((prev) => prev.filter((_, i) => i !== index))
-  }
+    setSelectedImages((prev) => prev.filter((_, i) => i !== index));
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     // Handle form submission here
-    console.log("Form submitted:", { ...formData, images: selectedImages })
-  }
+    console.log("Form submitted:", { ...formData, images: selectedImages });
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -62,12 +75,18 @@ export default function CreatePostPage() {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center space-x-4">
             <Link href="/">
-              <Button variant="ghost" size="sm" className="flex items-center space-x-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="flex items-center space-x-2"
+              >
                 <ArrowLeft className="w-4 h-4" />
                 <span>Back</span>
               </Button>
             </Link>
-            <h1 className="text-xl md:text-2xl font-bold text-gray-900">Create New Post</h1>
+            <h1 className="text-xl md:text-2xl font-bold text-gray-900">
+              Create New Post
+            </h1>
           </div>
         </div>
       </header>
@@ -88,7 +107,12 @@ export default function CreatePostPage() {
                     id="title"
                     placeholder="Give your post a catchy title..."
                     value={formData.title}
-                    onChange={(e) => setFormData((prev) => ({ ...prev, title: e.target.value }))}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        title: e.target.value,
+                      }))
+                    }
                     required
                   />
                 </div>
@@ -101,11 +125,17 @@ export default function CreatePostPage() {
                     type="url"
                     placeholder="https://instagram.com/reel/... or https://youtube.com/watch?v=..."
                     value={formData.originalLink}
-                    onChange={(e) => setFormData((prev) => ({ ...prev, originalLink: e.target.value }))}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        originalLink: e.target.value,
+                      }))
+                    }
                     required
                   />
                   <p className="text-xs text-gray-500">
-                    Paste the link to the Instagram reel, YouTube video, or other social media content
+                    Paste the link to the Instagram reel, YouTube video, or
+                    other social media content
                   </p>
                 </div>
 
@@ -117,7 +147,12 @@ export default function CreatePostPage() {
                     placeholder="What inspired you about this content? Share your thoughts, insights, or how it affected you..."
                     className="min-h-[120px] resize-none"
                     value={formData.content}
-                    onChange={(e) => setFormData((prev) => ({ ...prev, content: e.target.value }))}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        content: e.target.value,
+                      }))
+                    }
                     required
                   />
                 </div>
@@ -136,8 +171,12 @@ export default function CreatePostPage() {
                     />
                     <label htmlFor="image-upload" className="cursor-pointer">
                       <Upload className="w-8 h-8 mx-auto mb-2 text-gray-400" />
-                      <p className="text-sm text-gray-600">Click to upload images or drag and drop</p>
-                      <p className="text-xs text-gray-400 mt-1">PNG, JPG, GIF up to 10MB each</p>
+                      <p className="text-sm text-gray-600">
+                        Click to upload images or drag and drop
+                      </p>
+                      <p className="text-xs text-gray-400 mt-1">
+                        PNG, JPG, GIF up to 10MB each
+                      </p>
                     </label>
                   </div>
 
@@ -173,7 +212,12 @@ export default function CreatePostPage() {
                     id="publishedDate"
                     type="date"
                     value={formData.publishedDate}
-                    onChange={(e) => setFormData((prev) => ({ ...prev, publishedDate: e.target.value }))}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        publishedDate: e.target.value,
+                      }))
+                    }
                     required
                   />
                 </div>
@@ -183,7 +227,9 @@ export default function CreatePostPage() {
                   <Label htmlFor="category">Category/Tag *</Label>
                   <Select
                     value={formData.category}
-                    onValueChange={(value) => setFormData((prev) => ({ ...prev, category: value }))}
+                    onValueChange={(value) =>
+                      setFormData((prev) => ({ ...prev, category: value }))
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select a category" />
@@ -203,7 +249,11 @@ export default function CreatePostPage() {
                   <Button type="submit" className="flex-1">
                     Publish Post
                   </Button>
-                  <Button type="button" variant="outline" className="flex-1 bg-transparent">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="flex-1 bg-transparent"
+                  >
                     Save as Draft
                   </Button>
                 </div>
@@ -213,5 +263,5 @@ export default function CreatePostPage() {
         </div>
       </main>
     </div>
-  )
+  );
 }

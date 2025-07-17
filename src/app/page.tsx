@@ -1,13 +1,20 @@
-"use client"
+"use client";
 
-import { Button } from "@/components/ui/button"
-import { ArrowRight, BookOpen, Heart, Share2, ExternalLink, X } from "lucide-react"
-import Link from "next/link"
-import Image from "next/image"
-import { useState } from "react"
+import { Button } from "@/src/components/ui/button";
+import {
+  ArrowRight,
+  BookOpen,
+  Heart,
+  Share2,
+  ExternalLink,
+  X,
+} from "lucide-react";
+import Link from "next/link";
+import Image from "next/image";
+import { useState } from "react";
 
 export default function LandingPage() {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const recentPosts = [
     {
@@ -43,14 +50,16 @@ export default function LandingPage() {
       image: "/placeholder.svg?height=200&width=300",
       likes: 18,
     },
-  ]
+  ];
 
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section with Integrated Navigation */}
       <section
         className="relative min-h-screen bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: "url('/images/switzerland-countryside.jpg')" }}
+        style={{
+          backgroundImage: "url('/images/switzerland-countryside.jpg')",
+        }}
       >
         {/* Overlay for better text readability */}
         <div className="absolute inset-0 bg-black/40"></div>
@@ -63,10 +72,15 @@ export default function LandingPage() {
 
               {/* Desktop Navigation */}
               <div className="hidden md:flex items-center space-x-3">
-                <Button variant="ghost" className="text-white/80 hover:text-white hover:bg-white/10">
+                <Button
+                  variant="ghost"
+                  className="text-white/80 hover:text-white hover:bg-white/10"
+                >
                   Sign In
                 </Button>
-                <Button className="bg-white text-gray-900 hover:bg-gray-100">Sign Up</Button>
+                <Button className="bg-white text-gray-900 hover:bg-gray-100">
+                  Sign Up
+                </Button>
               </div>
 
               {/* Mobile Hamburger Button */}
@@ -161,8 +175,12 @@ export default function LandingPage() {
         {/* Hero Content */}
         <div className="relative z-10 container mx-auto px-4 flex items-center justify-center min-h-screen">
           <div className="max-w-4xl mx-auto text-center text-white">
-            <h1 className="text-5xl md:text-7xl font-bold mb-6 drop-shadow-lg">No More Bookmarks</h1>
-            <p className="text-xl md:text-3xl mb-8 font-light drop-shadow-md">Stop saving it, start living it</p>
+            <h1 className="text-5xl md:text-7xl font-bold mb-6 drop-shadow-lg">
+              No More Bookmarks
+            </h1>
+            <p className="text-xl md:text-3xl mb-8 font-light drop-shadow-md">
+              Stop saving it, start living it
+            </p>
           </div>
         </div>
       </section>
@@ -171,9 +189,12 @@ export default function LandingPage() {
       <section className="py-16 md:py-20 bg-gray-50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Recent Discoveries</h2>
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              Recent Discoveries
+            </h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              See what others are archiving and get inspired by their discoveries
+              See what others are archiving and get inspired by their
+              discoveries
             </p>
           </div>
 
@@ -197,7 +218,9 @@ export default function LandingPage() {
                 {/* Content */}
                 <div className="p-6">
                   {/* Title */}
-                  <h3 className="font-semibold text-lg text-gray-900 mb-3 line-clamp-2 leading-snug">{post.title}</h3>
+                  <h3 className="font-semibold text-lg text-gray-900 mb-3 line-clamp-2 leading-snug">
+                    {post.title}
+                  </h3>
 
                   {/* Date */}
                   <p className="text-sm text-gray-500 mb-4">
@@ -227,7 +250,11 @@ export default function LandingPage() {
 
           <div className="text-center mt-12">
             <Link href="/feed">
-              <Button variant="outline" size="lg" className="text-lg px-8 py-3 bg-transparent">
+              <Button
+                variant="outline"
+                size="lg"
+                className="text-lg px-8 py-3 bg-transparent"
+              >
                 View All Posts
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
@@ -240,9 +267,12 @@ export default function LandingPage() {
       <section className="py-16 md:py-20 bg-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">How It Works</h2>
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              How It Works
+            </h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Start archiving your favorite social media content in just a few simple steps
+              Start archiving your favorite social media content in just a few
+              simple steps
             </p>
           </div>
 
@@ -254,11 +284,14 @@ export default function LandingPage() {
                   <div className="w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-lg mr-4">
                     1
                   </div>
-                  <h3 className="text-2xl font-bold text-gray-900">Find Inspiring Content</h3>
+                  <h3 className="text-2xl font-bold text-gray-900">
+                    Find Inspiring Content
+                  </h3>
                 </div>
                 <p className="text-gray-600 text-lg leading-relaxed mb-6">
-                  Discover amazing Instagram reels, YouTube videos, TikToks, or any social media content that inspires
-                  you. Copy the link to the content you want to save and reflect on.
+                  Discover amazing Instagram reels, YouTube videos, TikToks, or
+                  any social media content that inspires you. Copy the link to
+                  the content you want to save and reflect on.
                 </p>
                 <ul className="space-y-2 text-gray-600">
                   <li className="flex items-center">
@@ -306,11 +339,14 @@ export default function LandingPage() {
                   <div className="w-10 h-10 bg-green-600 text-white rounded-full flex items-center justify-center font-bold text-lg mr-4">
                     2
                   </div>
-                  <h3 className="text-2xl font-bold text-gray-900">Create Your Post</h3>
+                  <h3 className="text-2xl font-bold text-gray-900">
+                    Create Your Post
+                  </h3>
                 </div>
                 <p className="text-gray-600 text-lg leading-relaxed mb-6">
-                  Click "Start Archiving" and fill out the simple form. Add a catchy title, paste the original link, and
-                  share your thoughts about what inspired you.
+                  Click "Start Archiving" and fill out the simple form. Add a
+                  catchy title, paste the original link, and share your thoughts
+                  about what inspired you.
                 </p>
                 <ul className="space-y-2 text-gray-600">
                   <li className="flex items-center">
@@ -336,11 +372,14 @@ export default function LandingPage() {
                   <div className="w-10 h-10 bg-purple-600 text-white rounded-full flex items-center justify-center font-bold text-lg mr-4">
                     3
                   </div>
-                  <h3 className="text-2xl font-bold text-gray-900">Add Details & Media</h3>
+                  <h3 className="text-2xl font-bold text-gray-900">
+                    Add Details & Media
+                  </h3>
                 </div>
                 <p className="text-gray-600 text-lg leading-relaxed mb-6">
-                  Enhance your post by uploading related images, selecting a category, and setting the published date.
-                  These details help organize your personal archive.
+                  Enhance your post by uploading related images, selecting a
+                  category, and setting the published date. These details help
+                  organize your personal archive.
                 </p>
                 <ul className="space-y-2 text-gray-600">
                   <li className="flex items-center">
@@ -388,11 +427,14 @@ export default function LandingPage() {
                   <div className="w-10 h-10 bg-orange-600 text-white rounded-full flex items-center justify-center font-bold text-lg mr-4">
                     4
                   </div>
-                  <h3 className="text-2xl font-bold text-gray-900">Share & Discover</h3>
+                  <h3 className="text-2xl font-bold text-gray-900">
+                    Share & Discover
+                  </h3>
                 </div>
                 <p className="text-gray-600 text-lg leading-relaxed mb-6">
-                  Your post is now part of your personal archive! Browse through your collection, discover what others
-                  are saving, and build a community around shared inspiration.
+                  Your post is now part of your personal archive! Browse through
+                  your collection, discover what others are saving, and build a
+                  community around shared inspiration.
                 </p>
                 <ul className="space-y-2 text-gray-600">
                   <li className="flex items-center">
@@ -415,13 +457,19 @@ export default function LandingPage() {
           {/* Call to Action */}
           <div className="text-center mt-16">
             <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-8 md:p-12 text-white">
-              <h3 className="text-2xl md:text-3xl font-bold mb-4">Ready to Start Your Archive?</h3>
+              <h3 className="text-2xl md:text-3xl font-bold mb-4">
+                Ready to Start Your Archive?
+              </h3>
               <p className="text-lg md:text-xl mb-8 opacity-90 max-w-2xl mx-auto">
-                Join thousands of users who are already building their personal collections of inspiring content
+                Join thousands of users who are already building their personal
+                collections of inspiring content
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link href="/create">
-                  <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100 text-lg px-8 py-3">
+                  <Button
+                    size="lg"
+                    className="bg-white text-blue-600 hover:bg-gray-100 text-lg px-8 py-3"
+                  >
                     Create Your First Post
                     <ArrowRight className="w-5 h-5 ml-2" />
                   </Button>
@@ -449,14 +497,22 @@ export default function LandingPage() {
             <div className="md:col-span-2">
               <h3 className="text-xl font-bold mb-4">No more bookmarks</h3>
               <p className="text-gray-400 mb-4 max-w-md">
-                Your personal archive for social media inspiration. Save, organize, and reflect on the content that
-                matters to you.
+                Your personal archive for social media inspiration. Save,
+                organize, and reflect on the content that matters to you.
               </p>
               <div className="flex space-x-4">
-                <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white p-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-gray-400 hover:text-white p-2"
+                >
                   <ExternalLink className="w-5 h-5" />
                 </Button>
-                <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white p-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-gray-400 hover:text-white p-2"
+                >
                   <Share2 className="w-5 h-5" />
                 </Button>
               </div>
@@ -466,12 +522,18 @@ export default function LandingPage() {
               <h4 className="font-semibold mb-4">Platform</h4>
               <ul className="space-y-2 text-gray-400">
                 <li>
-                  <Link href="/feed" className="hover:text-white transition-colors">
+                  <Link
+                    href="/feed"
+                    className="hover:text-white transition-colors"
+                  >
                     Browse Posts
                   </Link>
                 </li>
                 <li>
-                  <Link href="/create" className="hover:text-white transition-colors">
+                  <Link
+                    href="/create"
+                    className="hover:text-white transition-colors"
+                  >
                     Create Post
                   </Link>
                 </li>
@@ -521,5 +583,5 @@ export default function LandingPage() {
         </div>
       </footer>
     </div>
-  )
+  );
 }

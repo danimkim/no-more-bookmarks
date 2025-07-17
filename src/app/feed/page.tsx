@@ -1,7 +1,14 @@
-import { Button } from "@/components/ui/button"
-import { Heart, MessageCircle, Share2, ExternalLink, Plus, ArrowLeft } from "lucide-react"
-import Link from "next/link"
-import Image from "next/image"
+import { Button } from "@/src/components/ui/button";
+import {
+  Heart,
+  MessageCircle,
+  Share2,
+  ExternalLink,
+  Plus,
+  ArrowLeft,
+} from "lucide-react";
+import Link from "next/link";
+import Image from "next/image";
 
 export default function FeedPage() {
   const posts = [
@@ -69,7 +76,7 @@ export default function FeedPage() {
       likes: 89,
       comments: 23,
     },
-  ]
+  ];
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -79,12 +86,18 @@ export default function FeedPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <Link href="/">
-                <Button variant="ghost" size="sm" className="flex items-center space-x-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="flex items-center space-x-2"
+                >
                   <ArrowLeft className="w-4 h-4" />
                   <span className="hidden sm:inline">Home</span>
                 </Button>
               </Link>
-              <h1 className="text-xl md:text-2xl font-bold text-gray-900">Feed</h1>
+              <h1 className="text-xl md:text-2xl font-bold text-gray-900">
+                Feed
+              </h1>
             </div>
             <Link href="/create">
               <Button className="flex items-center space-x-2">
@@ -121,10 +134,14 @@ export default function FeedPage() {
               {/* Content */}
               <div className="p-6">
                 {/* Title */}
-                <h3 className="font-semibold text-lg text-gray-900 mb-3 line-clamp-2 leading-snug">{post.title}</h3>
+                <h3 className="font-semibold text-lg text-gray-900 mb-3 line-clamp-2 leading-snug">
+                  {post.title}
+                </h3>
 
                 {/* Content preview */}
-                <p className="text-gray-600 text-sm line-clamp-3 mb-4 leading-relaxed">{post.content}</p>
+                <p className="text-gray-600 text-sm line-clamp-3 mb-4 leading-relaxed">
+                  {post.content}
+                </p>
 
                 {/* Date */}
                 <p className="text-sm text-gray-500 mb-4">
@@ -163,7 +180,11 @@ export default function FeedPage() {
                       <MessageCircle className="w-4 h-4" />
                       <span className="text-sm">{post.comments}</span>
                     </div>
-                    <Button variant="ghost" size="sm" className="text-gray-400 hover:text-gray-600">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-gray-400 hover:text-gray-600"
+                    >
                       <Share2 className="w-4 h-4" />
                     </Button>
                   </div>
@@ -174,5 +195,5 @@ export default function FeedPage() {
         </div>
       </main>
     </div>
-  )
+  );
 }
