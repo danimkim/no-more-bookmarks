@@ -4,11 +4,13 @@ import { Button } from "@/src/components/ui/button";
 import {
   ArrowRight,
   BookOpen,
-  Heart,
   Share2,
   ExternalLink,
   X,
+  PlayCircle,
 } from "lucide-react";
+import Instagram from "@/public/instagram.svg";
+import Youtube from "@/public/youtube.svg";
 import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
@@ -16,39 +18,30 @@ import { useState } from "react";
 export default function LandingPage() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const recentPosts = [
+  const carouselItems = [
     {
       id: 1,
-      title: "Amazing Street Art in Tokyo",
-      content:
-        "Found this incredible mural while exploring Shibuya. The way the artist used colors to represent urban life is just mesmerizing...",
-      author: "Alex Chen",
-      publishedDate: "2024-01-15",
-      category: "Art & Culture",
-      image: "/placeholder.svg?height=200&width=300",
-      likes: 24,
+      image: "/images/instagram-bookmarked.png",
+      title: "Instagram Post Saved",
+      description: "Bookmark inspiring posts to revisit later.",
+      type: "Instagram",
+      icon: <Image src={Instagram} alt="Instagram" className="w-4 h-4" />,
     },
     {
       id: 2,
-      title: "Minimalist Home Setup Tour",
-      content:
-        "This YouTube video completely changed my perspective on living spaces. The creator shows how to achieve maximum functionality...",
-      author: "Sarah Kim",
-      publishedDate: "2024-01-14",
-      category: "Lifestyle",
-      image: "/placeholder.svg?height=200&width=300",
-      likes: 42,
+      image: "/images/youtube-save-later.png",
+      title: "YouTube Video Saved",
+      description: "Add videos to 'Watch Later' and never miss out.",
+      type: "YouTube",
+      icon: <Image src={Youtube} alt="Youtube" className="w-5 h-5" />,
     },
     {
       id: 3,
-      title: "Cooking Technique That Blew My Mind",
-      content:
-        "Never thought about using this method for pasta before! This TikTok chef's approach to creating the perfect sauce...",
-      author: "Mike Rodriguez",
-      publishedDate: "2024-01-13",
-      category: "Food & Cooking",
-      image: "/placeholder.svg?height=200&width=300",
-      likes: 18,
+      image: "/images/tiktok-favorited.png",
+      title: "TikTok Favorited",
+      description: "Keep your favorite TikToks in one place.",
+      type: "TikTok",
+      icon: <PlayCircle className="w-4 h-4" />,
     },
   ];
 
@@ -181,84 +174,73 @@ export default function LandingPage() {
             <p className="text-xl md:text-3xl mb-8 font-light drop-shadow-md">
               Stop saving it, start living it
             </p>
+            <div className="flex flex-col lg:flex-row gap-4 justify-center items-center">
+              <Link href="/feed">
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="border-white text-white hover:bg-white hover:text-blue-600 text-lg px-8 py-3 bg-transparent"
+                >
+                  <BookOpen className="w-5 h-5 mr-2" />
+                  Explore Posts
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Recent Posts Section */}
+      {/* Motivational Section with Carousel */}
       <section className="py-16 md:py-20 bg-gray-50">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Recent Discoveries
-            </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              See what others are archiving and get inspired by their
-              discoveries
+          <div className="max-w-3xl mx-auto text-center mb-12">
+            <p className="text-lg md:text-xl text-gray-600 mb-6">
+              Ever saved countless posts about your dream travel destination,
+              only to find yourself still dreaming?
             </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {recentPosts.map((post) => (
-              <div
-                key={post.id}
-                className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100"
-              >
-                {/* Image at top */}
-                <div className="aspect-[4/3] overflow-hidden">
-                  <Image
-                    src={post.image || "/placeholder.svg"}
-                    alt={post.title}
-                    width={400}
-                    height={300}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-
-                {/* Content */}
-                <div className="p-6">
-                  {/* Title */}
-                  <h3 className="font-semibold text-lg text-gray-900 mb-3 line-clamp-2 leading-snug">
-                    {post.title}
-                  </h3>
-
-                  {/* Date */}
-                  <p className="text-sm text-gray-500 mb-4">
-                    {new Date(post.publishedDate).toLocaleDateString("en-US", {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    })}
-                  </p>
-
-                  {/* Category Badge */}
-                  <div className="flex items-center justify-between">
-                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
-                      {post.category.toLowerCase()}
-                    </span>
-
-                    {/* Like count */}
-                    <div className="flex items-center space-x-1 text-gray-400">
-                      <Heart className="w-4 h-4" />
-                      <span className="text-sm">{post.likes}</span>
+            {/* Carousel of inspiring content */}
+            <div className="relative">
+              <div className="flex overflow-x-auto snap-x snap-mandatory pb-6 scrollbar-hide lg:justify-center">
+                {carouselItems.map((item) => (
+                  <div
+                    key={item.id}
+                    className="flex-shrink-0 w-72 snap-center mx-3"
+                  >
+                    <div className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100">
+                      <div className="aspect-[4/3] overflow-hidden">
+                        <Image
+                          src={item.image || "/placeholder.svg"}
+                          alt={item.title}
+                          width={300}
+                          height={225}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div className="p-4">
+                        <h3 className="font-semibold text-base text-gray-900 mb-2 line-clamp-2">
+                          {item.title}
+                        </h3>
+                        <p className="text-sm text-gray-600 mb-3">
+                          {item.description}
+                        </p>
+                        <div className="flex items-center text-sm text-gray-600">
+                          {item.icon}
+                          <span className="ml-2">{item.type}</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
+                ))}
               </div>
-            ))}
-          </div>
-
-          <div className="text-center mt-12">
-            <Link href="/feed">
-              <Button
-                variant="outline"
-                size="lg"
-                className="text-lg px-8 py-3 bg-transparent"
-              >
-                View All Posts
-                <ArrowRight className="w-5 h-5 ml-2" />
-              </Button>
-            </Link>
+            </div>
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 mt-12">
+              Beyond Bookmarks: Live Your Inspiration, Archive Your Life!
+            </h2>
+            <p className="text-lg text-gray-600">
+              No more bookmarks helps you turn inspiration into action. Document
+              your real-life experiences, reflect on what truly matters, and
+              build a personal archive of your lived adventures.
+            </p>
           </div>
         </div>
       </section>
@@ -270,10 +252,6 @@ export default function LandingPage() {
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               How It Works
             </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Start archiving your favorite social media content in just a few
-              simple steps
-            </p>
           </div>
 
           <div className="max-w-6xl mx-auto">
@@ -428,26 +406,26 @@ export default function LandingPage() {
                     4
                   </div>
                   <h3 className="text-2xl font-bold text-gray-900">
-                    Share & Discover
+                    Celebrate & Share
                   </h3>
                 </div>
                 <p className="text-gray-600 text-lg leading-relaxed mb-6">
-                  Your post is now part of your personal archive! Browse through
-                  your collection, discover what others are saving, and build a
-                  community around shared inspiration.
+                  Your post becomes part of your private archive — a personal
+                  space to reflect on what you’ve accomplished and stay
+                  motivated.
                 </p>
                 <ul className="space-y-2 text-gray-600">
                   <li className="flex items-center">
                     <div className="w-2 h-2 bg-orange-600 rounded-full mr-3"></div>
-                    View your personal archive anytime
+                    Revisit your personal archive anytime
                   </li>
                   <li className="flex items-center">
                     <div className="w-2 h-2 bg-orange-600 rounded-full mr-3"></div>
-                    Discover posts from other users
+                    Celebrate your progress in one place
                   </li>
                   <li className="flex items-center">
                     <div className="w-2 h-2 bg-orange-600 rounded-full mr-3"></div>
-                    Like, comment, and share inspiration
+                    Optionally share your posts with others
                   </li>
                 </ul>
               </div>
@@ -461,8 +439,8 @@ export default function LandingPage() {
                 Ready to Start Your Archive?
               </h3>
               <p className="text-lg md:text-xl mb-8 opacity-90 max-w-2xl mx-auto">
-                Join thousands of users who are already building their personal
-                collections of inspiring content
+                Don’t just save ideas — act on them. Build your archive of
+                progress.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link href="/create">
@@ -578,7 +556,10 @@ export default function LandingPage() {
           </div>
 
           <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; 2024 No more bookmarks. All rights reserved.</p>
+            <p>
+              &copy; {new Date().getFullYear()} No more bookmarks. All rights
+              reserved.
+            </p>
           </div>
         </div>
       </footer>
