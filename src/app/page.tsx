@@ -66,13 +66,17 @@ export default function LandingPage() {
               {/* Desktop Navigation */}
               <div className="hidden md:flex items-center space-x-3">
                 <Button
+                  asChild
                   variant="ghost"
                   className="text-white/80 hover:text-white hover:bg-white/10"
                 >
-                  Sign In
+                  <Link href="/signin">Sign In</Link>
                 </Button>
-                <Button className="bg-white text-gray-900 hover:bg-gray-100">
-                  Sign Up
+                <Button
+                  asChild
+                  className="bg-white text-gray-900 hover:bg-gray-100"
+                >
+                  <Link href="/signup">Sign Up</Link>
                 </Button>
               </div>
 
@@ -148,17 +152,19 @@ export default function LandingPage() {
 
               <div className="border-t pt-8 space-y-4">
                 <Button
+                  asChild
                   variant="ghost"
                   className="w-full justify-start text-lg text-gray-700 hover:text-gray-900 hover:bg-gray-50"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
-                  Sign In
+                  <Link href="/signin">Sign In</Link>
                 </Button>
                 <Button
+                  asChild
                   className="w-full bg-blue-600 hover:bg-blue-700 text-lg"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
-                  Sign Up
+                  <Link href="/signup">Sign Up</Link>
                 </Button>
               </div>
             </div>
