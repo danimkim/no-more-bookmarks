@@ -30,7 +30,7 @@ export default function CreatePostPage() {
     title: "",
     originalLink: "",
     content: "",
-    publishedDate: "",
+    executedDate: "",
     category: "",
   });
 
@@ -207,15 +207,15 @@ export default function CreatePostPage() {
 
                 {/* Published Date */}
                 <div className="space-y-2">
-                  <Label htmlFor="publishedDate">Published Date *</Label>
+                  <Label htmlFor="executedDate">Executed Date *</Label>
                   <Input
-                    id="publishedDate"
+                    id="executedDate"
                     type="date"
-                    value={formData.publishedDate}
+                    value={formData.executedDate}
                     onChange={(e) =>
                       setFormData((prev) => ({
                         ...prev,
-                        publishedDate: e.target.value,
+                        executedDate: e.target.value,
                       }))
                     }
                     required

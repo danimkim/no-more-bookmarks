@@ -19,7 +19,7 @@ export default function FeedPage() {
         "Found this incredible mural while exploring Shibuya. The way the artist used colors to represent urban life is just mesmerizing. This Instagram reel really captured the essence of modern Japanese street culture.",
       originalLink: "https://instagram.com/reel/example1",
       author: "Alex Chen",
-      publishedDate: "2024-01-15",
+      executedDate: "2024-01-15",
       category: "Art & Culture",
       image: "/placeholder.svg?height=300&width=400",
       likes: 24,
@@ -32,7 +32,7 @@ export default function FeedPage() {
         "This YouTube video completely changed my perspective on living spaces. The creator shows how to achieve maximum functionality with minimal items. Definitely implementing some of these ideas in my own space.",
       originalLink: "https://youtube.com/watch?v=example2",
       author: "Sarah Kim",
-      publishedDate: "2024-01-14",
+      executedDate: "2024-01-14",
       category: "Lifestyle",
       image: "/placeholder.svg?height=300&width=400",
       likes: 42,
@@ -45,7 +45,7 @@ export default function FeedPage() {
         "Never thought about using this method for pasta before! This TikTok chef's approach to creating the perfect sauce consistency is genius. Tried it last night and the results were incredible.",
       originalLink: "https://tiktok.com/@chef/video/example3",
       author: "Mike Rodriguez",
-      publishedDate: "2024-01-13",
+      executedDate: "2024-01-13",
       category: "Food & Cooking",
       likes: 18,
       comments: 5,
@@ -57,7 +57,7 @@ export default function FeedPage() {
         "This photographer's approach to capturing city life through time-lapse is absolutely stunning. The way they show the flow of people and traffic creates such a beautiful narrative about urban rhythm.",
       originalLink: "https://instagram.com/reel/example4",
       author: "Emma Wilson",
-      publishedDate: "2024-01-12",
+      executedDate: "2024-01-12",
       category: "Photography",
       image: "/placeholder.svg?height=300&width=400",
       likes: 67,
@@ -70,7 +70,7 @@ export default function FeedPage() {
         "Found this fitness influencer who completely changed my understanding of home workouts. No equipment needed, just 15 minutes a day. The results after just two weeks are incredible!",
       originalLink: "https://youtube.com/watch?v=example5",
       author: "David Park",
-      publishedDate: "2024-01-11",
+      executedDate: "2024-01-11",
       category: "Fitness",
       image: "/placeholder.svg?height=300&width=400",
       likes: 89,
@@ -145,7 +145,7 @@ export default function FeedPage() {
 
                 {/* Date */}
                 <p className="text-sm text-gray-500 mb-4">
-                  {new Date(post.publishedDate).toLocaleDateString("en-US", {
+                  {new Date(post.executedDate).toLocaleDateString("en-US", {
                     year: "numeric",
                     month: "long",
                     day: "numeric",
