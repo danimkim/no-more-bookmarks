@@ -13,144 +13,70 @@ import {
 import { Input } from "@/src/components/ui/input";
 import { Label } from "@/src/components/ui/label";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
-import { createClient } from "@/src/lib/supabase/client";
+import { signUpAction, resendConfirmationAction } from "@/src/lib/auth/actions";
 
 export default function SignUpPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [emailSent, setEmailSent] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [isError, setIsError] = useState(false);
+  const [isPending, startTransition] = useTransition();
 
   const router = useRouter();
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     setMessage("");
     setIsError(false);
 
-    if (formData.password !== formData.confirmPassword) {
-      alert("Passwords do not match!");
-
+    // Client-side validation
     if (password !== confirmPassword) {
       setMessage("Passwords do not match!");
       setIsError(true);
-      setLoading(false);
       return;
     }
 
     if (password.length < 6) {
       setMessage("Password must be at least 6 characters long.");
       setIsError(true);
-      setLoading(false);
       return;
     }
 
-    try {
-      const supabase = createClient();
+    startTransition(async () => {
+      const formData = new FormData();
+      formData.append('email', email);
+      formData.append('password', password);
+      formData.append('confirmPassword', confirmPassword);
 
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/auth/confirm`,
-        },
-      });
-
-    // TODO: Redirect to feed page
-  };
-
-  const router = useRouter();
-
-      if (error) {
-        console.error("Signup error:", error);
-        throw error;
+      const result = await signUpAction(formData);
+      
+      setMessage(result.message);
+      setIsError(!result.success);
+      
+      if (result.success && result.requiresConfirmation) {
+        setEmailSent(true);
       }
-
-      // Check for existing user: if identities array is empty, user already exists
-      // This is the most reliable way to detect existing users in Supabase
-      if (
-        data.user &&
-        data.user.identities &&
-        data.user.identities.length === 0
-      ) {
-        setMessage(
-          "(1) This email has already been signed up. Please try signing in instead."
-        );
-        setIsError(true);
-        setLoading(false);
-        return;
-      }
-
-      // Additional check: if user was created a long time ago (more than 1 minute)
-      // and we just got it back, it's likely an existing user
-      if (data.user && data.user.created_at) {
-        const createdAt = new Date(data.user.created_at);
-        const now = new Date();
-        const diffMinutes = (now.getTime() - createdAt.getTime()) / (1000 * 60);
-
-        if (diffMinutes > 1) {
-          setMessage(
-            "(2) This email has already been signed up. Please try signing in instead."
-          );
-          setIsError(true);
-          setLoading(false);
-          return;
-        }
-      }
-
-      setEmailSent(true);
-      setMessage(
-        "A confirmation link has been sent to your email address. Please check your inbox and click the link to verify your account!"
-      );
-      setIsError(false);
-    } catch (error: any) {
-      setEmailSent(false);
-      setMessage(
-        error.message || "An unexpected error occurred. Please try again."
-      );
-      setIsError(true);
-    } finally {
-      setLoading(false);
-    }
+    });
   };
 
   const handleResendEmail = async () => {
-    setLoading(true);
     setMessage("");
     setIsError(false);
 
-    try {
-      const supabase = createClient();
-      const { error } = await supabase.auth.resend({
-        type: "signup",
-        email,
-        options: {
-          emailRedirectTo: `${window.location.origin}/auth/confirm`,
-        },
-      });
+    startTransition(async () => {
+      const formData = new FormData();
+      formData.append('email', email);
 
-      if (error) {
-        throw error;
-      }
-
-      setMessage("Confirmation email re-sent! Please check your inbox.");
-      setIsError(false);
-    } catch (error: any) {
-      setMessage(
-        error.message ||
-          "An unexpected error occurred during resend. Please try again."
-      );
-      setIsError(true);
-    } finally {
-      setLoading(false);
-    }
+      const result = await resendConfirmationAction(formData);
+      
+      setMessage(result.message);
+      setIsError(!result.success);
+    });
   };
 
   return (
@@ -185,7 +111,7 @@ export default function SignUpPage() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  disabled={loading}
+                  disabled={isPending}
                 />
               </div>
               <div className="space-y-2">
@@ -197,7 +123,7 @@ export default function SignUpPage() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  disabled={loading}
+                  disabled={isPending}
                 />
               </div>
               <div className="space-y-2">
@@ -209,7 +135,7 @@ export default function SignUpPage() {
                   required
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  disabled={loading}
+                  disabled={isPending}
                 />
               </div>
               {message && !emailSent && (
@@ -221,8 +147,8 @@ export default function SignUpPage() {
                   {message}
                 </p>
               )}
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? "Creating Account..." : "Sign Up"}
+              <Button type="submit" className="w-full" disabled={isPending}>
+                {isPending ? "Creating Account..." : "Sign Up"}
               </Button>
             </form>
           ) : (
@@ -241,9 +167,9 @@ export default function SignUpPage() {
               <Button
                 onClick={handleResendEmail}
                 className="w-full"
-                disabled={loading}
+                disabled={isPending}
               >
-                {loading ? "Resending..." : "Resend Email"}
+                {isPending ? "Resending..." : "Resend Email"}
               </Button>
             </div>
           )}

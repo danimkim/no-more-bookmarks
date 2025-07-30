@@ -1,8 +1,8 @@
 import { type EmailOtpType } from "@supabase/supabase-js";
 import { type NextRequest } from "next/server";
-
-import { createClient } from "@/src/lib/supabase/server";
+import { createServerClient } from "@supabase/ssr";
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -10,19 +10,34 @@ export async function GET(request: NextRequest) {
   const type = searchParams.get("type") as EmailOtpType | null;
   const next = searchParams.get("next") ?? "/feed";
 
-  if (token_hash && type) {
-    const supabase = await createClient();
+  const cookieStore = await cookies();
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return cookieStore.getAll();
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value, options }) => {
+            cookieStore.set(name, value, options);
+          });
+        },
+      },
+    }
+  );
 
+  if (token_hash && type) {
     const { error } = await supabase.auth.verifyOtp({
       type,
       token_hash,
     });
+
     if (!error) {
-      // redirect user to specified redirect URL or feed page
-      redirect(next);
+      return redirect(next);
     }
   }
 
-  // redirect the user to signin with error message
   redirect("/signin?error=auth-failed");
 }
