@@ -22,7 +22,13 @@ export class ImageUploadError extends Error {
 const DEFAULT_OPTIONS: Partial<ImageUploadOptions> = {
   bucket: "post-images",
   maxFileSize: 50 * 1024 * 1024, // 50MB
-  allowedTypes: ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"],
+  allowedTypes: [
+    "image/jpeg",
+    "image/jpg",
+    "image/png",
+    "image/gif",
+    "image/webp",
+  ],
 };
 
 export async function validateImageFile(
@@ -33,7 +39,9 @@ export async function validateImageFile(
 
   if (file.size > maxFileSize!) {
     throw new ImageUploadError(
-      `File size too large. Maximum size is ${Math.round(maxFileSize! / 1024 / 1024)}MB.`,
+      `File size too large. Maximum size is ${Math.round(
+        maxFileSize! / 1024 / 1024
+      )}MB.`,
       "FILE_TOO_LARGE"
     );
   }
@@ -46,6 +54,21 @@ export async function validateImageFile(
   }
 }
 
+function sanitizeFileName(fileName: string): string {
+  const lastDotIndex = fileName.lastIndexOf(".");
+  const name =
+    lastDotIndex > 0 ? fileName.substring(0, lastDotIndex) : fileName;
+  const extension = lastDotIndex > 0 ? fileName.substring(lastDotIndex) : "";
+
+  // Replace invalid characters with underscores
+  const sanitizedName = name.replace(/[^a-zA-Z0-9._-]/g, "_");
+
+  // Ensure the filename doesn't start or end with special characters
+  const cleanName = sanitizedName.replace(/^[._-]+|[._-]+$/g, "");
+
+  return cleanName + extension;
+}
+
 export async function uploadImage(
   file: File,
   options: ImageUploadOptions
@@ -56,15 +79,19 @@ export async function uploadImage(
   // Validate file
   await validateImageFile(file, options);
 
-  // Generate unique filename
+  // Generate unique filename with proper sanitization
   const timestamp = Date.now();
   const randomSuffix = Math.random().toString(36).substring(2, 8);
-  const fileName = `${userId}/${timestamp}_${randomSuffix}_${file.name}`;
+  const sanitizedOriginalName = sanitizeFileName(file.name);
+  const fileName = `${userId}/${timestamp}_${randomSuffix}_${sanitizedOriginalName}`;
 
   // Upload to Supabase Storage
   const { error: uploadError } = await supabase.storage
     .from(bucket!)
-    .upload(fileName, file);
+    .upload(fileName, file, {
+      cacheControl: "3600",
+      upsert: false,
+    });
 
   if (uploadError) {
     throw new ImageUploadError(

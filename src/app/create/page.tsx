@@ -25,18 +25,17 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/src/contexts/AuthContext";
-import { createClient } from "@/src/lib/supabase/client";
 import { ProtectedRoute } from "@/src/components/ProtectedRoute";
 import { useImageUpload } from "@/src/hooks/useImageUpload";
+import {
+  usePostOperations,
+  CreatePostData,
+} from "@/src/hooks/usePostOperations";
 import { UploadResult } from "@/src/lib/image-upload";
 
 export default function CreatePostPage() {
   const [selectedImages, setSelectedImages] = useState<string[]>([]);
   const [imageFiles, setImageFiles] = useState<File[]>([]);
-  const [uploadedImages, setUploadedImages] = useState<UploadResult[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
-  const [isError, setIsError] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
     originalLink: "",
@@ -47,7 +46,8 @@ export default function CreatePostPage() {
 
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
-  const supabase = createClient();
+
+  const postOperations = usePostOperations();
 
   const imageUpload = useImageUpload({
     userId: user?.id || "",
@@ -100,13 +100,9 @@ export default function CreatePostPage() {
         const imageUrl = URL.createObjectURL(file);
         setSelectedImages([imageUrl]);
         setImageFiles([file]);
-        setMessage("");
-        setIsError(false);
         imageUpload.clearError();
       } catch (error) {
         console.error("Error handling image upload:", error);
-        setMessage("Error processing image");
-        setIsError(true);
       }
     }
   };
@@ -118,111 +114,24 @@ export default function CreatePostPage() {
     setImageFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const validateForm = () => {
-    const errors: string[] = [];
-
-    if (!formData.title.trim()) {
-      errors.push("Title is required");
-    } else if (formData.title.length > 200) {
-      errors.push("Title must be less than 200 characters");
-    }
-
-    if (!formData.originalLink.trim()) {
-      errors.push("Original link is required");
-    } else {
-      try {
-        new URL(formData.originalLink);
-      } catch {
-        errors.push("Please enter a valid URL");
-      }
-    }
-
-    if (!formData.content.trim()) {
-      errors.push("Your thoughts are required");
-    } else if (formData.content.length > 2000) {
-      errors.push("Content must be less than 2000 characters");
-    }
-
-    if (!formData.executedDate) {
-      errors.push("Executed date is required");
-    } else {
-      const selectedDate = new Date(formData.executedDate);
-      const today = new Date();
-      if (selectedDate > today) {
-        errors.push("Executed date cannot be in the future");
-      }
-    }
-
-    if (!formData.category) {
-      errors.push("Category is required");
-    }
-
-    if (imageFiles.length === 0) {
-      errors.push("Image is required");
-    }
-
-    return errors;
-  };
-
-  const uploadImages = async (): Promise<string[]> => {
-    if (imageFiles.length === 0) return [];
-
-    try {
-      const results = await imageUpload.uploadImages(imageFiles);
-      setUploadedImages(results);
-      return results.map((result) => result.url);
-    } catch (error) {
-      console.error("Image upload error:", error);
-      throw error;
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setMessage("");
-    setIsError(false);
 
-    // Validate form
-    const validationErrors = validateForm();
-    if (validationErrors.length > 0) {
-      setMessage(validationErrors.join(", "));
-      setIsError(true);
-      setLoading(false);
-      return;
-    }
+    if (!user) return;
 
-    try {
-      // Upload images first
-      const imageUrls = await uploadImages();
+    const createPostData: CreatePostData = {
+      title: formData.title,
+      originalLink: formData.originalLink,
+      content: formData.content,
+      executedDate: formData.executedDate,
+      category: formData.category,
+      userId: user.id,
+    };
 
-      const postData = {
-        user_id: user.id,
-        title: formData.title.trim(),
-        bookmark_url: formData.originalLink.trim(),
-        executed_at: formData.executedDate,
-        review: formData.content.trim(),
-        images: imageUrls.length > 0 ? imageUrls[0] : null,
-        category: formData.category,
-        is_public: false,
-      };
+    await postOperations.createPostHandler(createPostData, imageFiles);
 
-      // Insert post into database
-      const { error } = await supabase
-        .from("posts")
-        .insert(postData)
-        .select()
-        .single();
-
-      if (error) {
-        console.error("Database insert error:", error);
-        throw new Error("Failed to create post: " + error.message);
-      }
-
-      setMessage("Post created successfully!");
-      setIsError(false);
-
-      // Reset form
+    // Reset form on success
+    if (postOperations.success) {
       setFormData({
         title: "",
         originalLink: "",
@@ -232,26 +141,23 @@ export default function CreatePostPage() {
       });
       setSelectedImages([]);
       setImageFiles([]);
-      setUploadedImages([]);
       imageUpload.resetState();
-
-      // Redirect to feed after success
-      setTimeout(() => {
-        router.push("/feed");
-      }, 2000);
-    } catch (error: any) {
-      console.error("Form submission error:", error);
-      setMessage(error.message || "An error occurred while creating the post");
-      setIsError(true);
-    } finally {
-      setLoading(false);
     }
   };
 
   const handleSaveAsDraft = async () => {
-    // TODO: implement draft feature
-    setMessage("Draft functionality coming soon!");
-    setIsError(false);
+    if (!user) return;
+
+    const createPostData: CreatePostData = {
+      title: formData.title,
+      originalLink: formData.originalLink,
+      content: formData.content,
+      executedDate: formData.executedDate,
+      category: formData.category,
+      userId: user.id,
+    };
+
+    await postOperations.saveDraftHandler(createPostData, imageFiles);
   };
 
   return (
@@ -429,15 +335,20 @@ export default function CreatePostPage() {
                   </div>
 
                   {/* Message Display */}
-                  {(message || imageUpload.error) && (
+                  {(postOperations.error ||
+                    postOperations.success ||
+                    imageUpload.error) && (
                     <div
                       className={`p-4 rounded-lg text-sm ${
-                        isError || imageUpload.error
+                        postOperations.error || imageUpload.error
                           ? "bg-red-50 text-red-700 border border-red-200"
                           : "bg-green-50 text-green-700 border border-green-200"
                       }`}
                     >
-                      {message || imageUpload.error}
+                      {postOperations.error ||
+                        imageUpload.error ||
+                        (postOperations.success &&
+                          "Post created successfully!")}
                     </div>
                   )}
 
@@ -446,9 +357,9 @@ export default function CreatePostPage() {
                     <Button
                       type="submit"
                       className="flex-1"
-                      disabled={loading || imageUpload.uploading}
+                      disabled={postOperations.loading || imageUpload.uploading}
                     >
-                      {loading
+                      {postOperations.loading
                         ? "Publishing..."
                         : imageUpload.uploading
                         ? "Uploading..."
@@ -459,7 +370,7 @@ export default function CreatePostPage() {
                       variant="outline"
                       className="flex-1 bg-transparent"
                       onClick={handleSaveAsDraft}
-                      disabled={loading}
+                      disabled={postOperations.loading}
                     >
                       Save as Draft
                     </Button>
