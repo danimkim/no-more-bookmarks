@@ -21,11 +21,22 @@ import {
 } from "@/src/components/ui/select";
 import { ArrowLeft, Upload, X } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/src/contexts/AuthContext";
+import { createClient } from "@/src/lib/supabase/client";
+import { ProtectedRoute } from "@/src/components/ProtectedRoute";
+import { useImageUpload } from "@/src/hooks/useImageUpload";
+import { UploadResult } from "@/src/lib/image-upload";
 
 export default function CreatePostPage() {
   const [selectedImages, setSelectedImages] = useState<string[]>([]);
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [uploadedImages, setUploadedImages] = useState<UploadResult[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+  const [isError, setIsError] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
     originalLink: "",
@@ -33,6 +44,34 @@ export default function CreatePostPage() {
     executedDate: "",
     category: "",
   });
+
+  const router = useRouter();
+  const { user, loading: authLoading } = useAuth();
+  const supabase = createClient();
+
+  const imageUpload = useImageUpload({
+    userId: user?.id || "",
+    bucket: "post-images",
+    maxFileSize: 50 * 1024 * 1024, // 50MB
+  });
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push("/signin");
+    }
+  }, [user, authLoading, router]);
+
+  if (authLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null;
+  }
 
   const categories = [
     "Art & Culture",
@@ -50,218 +89,387 @@ export default function CreatePostPage() {
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
-    if (files) {
-      const newImages = Array.from(files).map((file) =>
-        URL.createObjectURL(file)
-      );
-      setSelectedImages((prev) => [...prev, ...newImages]);
+    if (files && files[0] && user) {
+      const file = files[0];
+
+      try {
+        // Clear previous image if exists (for single image mode)
+        selectedImages.forEach((imageUrl) => URL.revokeObjectURL(imageUrl));
+
+        // TODO: implement multiple image support
+        const imageUrl = URL.createObjectURL(file);
+        setSelectedImages([imageUrl]);
+        setImageFiles([file]);
+        setMessage("");
+        setIsError(false);
+        imageUpload.clearError();
+      } catch (error) {
+        console.error("Error handling image upload:", error);
+        setMessage("Error processing image");
+        setIsError(true);
+      }
     }
   };
 
   const removeImage = (index: number) => {
+    // Revoke object URL to prevent memory leaks
+    URL.revokeObjectURL(selectedImages[index]);
     setSelectedImages((prev) => prev.filter((_, i) => i !== index));
+    setImageFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const validateForm = () => {
+    const errors: string[] = [];
+
+    if (!formData.title.trim()) {
+      errors.push("Title is required");
+    } else if (formData.title.length > 200) {
+      errors.push("Title must be less than 200 characters");
+    }
+
+    if (!formData.originalLink.trim()) {
+      errors.push("Original link is required");
+    } else {
+      try {
+        new URL(formData.originalLink);
+      } catch {
+        errors.push("Please enter a valid URL");
+      }
+    }
+
+    if (!formData.content.trim()) {
+      errors.push("Your thoughts are required");
+    } else if (formData.content.length > 2000) {
+      errors.push("Content must be less than 2000 characters");
+    }
+
+    if (!formData.executedDate) {
+      errors.push("Executed date is required");
+    } else {
+      const selectedDate = new Date(formData.executedDate);
+      const today = new Date();
+      if (selectedDate > today) {
+        errors.push("Executed date cannot be in the future");
+      }
+    }
+
+    if (!formData.category) {
+      errors.push("Category is required");
+    }
+
+    if (imageFiles.length === 0) {
+      errors.push("Image is required");
+    }
+
+    return errors;
+  };
+
+  const uploadImages = async (): Promise<string[]> => {
+    if (imageFiles.length === 0) return [];
+
+    try {
+      const results = await imageUpload.uploadImages(imageFiles);
+      setUploadedImages(results);
+      return results.map((result) => result.url);
+    } catch (error) {
+      console.error("Image upload error:", error);
+      throw error;
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission here
-    console.log("Form submitted:", { ...formData, images: selectedImages });
+    setLoading(true);
+    setMessage("");
+    setIsError(false);
+
+    // Validate form
+    const validationErrors = validateForm();
+    if (validationErrors.length > 0) {
+      setMessage(validationErrors.join(", "));
+      setIsError(true);
+      setLoading(false);
+      return;
+    }
+
+    try {
+      // Upload images first
+      const imageUrls = await uploadImages();
+
+      const postData = {
+        user_id: user.id,
+        title: formData.title.trim(),
+        bookmark_url: formData.originalLink.trim(),
+        executed_at: formData.executedDate,
+        review: formData.content.trim(),
+        images: imageUrls.length > 0 ? imageUrls[0] : null,
+        category: formData.category,
+        is_public: false,
+      };
+
+      // Insert post into database
+      const { error } = await supabase
+        .from("posts")
+        .insert(postData)
+        .select()
+        .single();
+
+      if (error) {
+        console.error("Database insert error:", error);
+        throw new Error("Failed to create post: " + error.message);
+      }
+
+      setMessage("Post created successfully!");
+      setIsError(false);
+
+      // Reset form
+      setFormData({
+        title: "",
+        originalLink: "",
+        content: "",
+        executedDate: "",
+        category: "",
+      });
+      setSelectedImages([]);
+      setImageFiles([]);
+      setUploadedImages([]);
+      imageUpload.resetState();
+
+      // Redirect to feed after success
+      setTimeout(() => {
+        router.push("/feed");
+      }, 2000);
+    } catch (error: any) {
+      console.error("Form submission error:", error);
+      setMessage(error.message || "An error occurred while creating the post");
+      setIsError(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSaveAsDraft = async () => {
+    // TODO: implement draft feature
+    setMessage("Draft functionality coming soon!");
+    setIsError(false);
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white border-b">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center space-x-4">
-            <Link href="/">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="flex items-center space-x-2"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                <span>Back</span>
-              </Button>
-            </Link>
-            <h1 className="text-xl md:text-2xl font-bold text-gray-900">
-              Create New Post
-            </h1>
+    <ProtectedRoute>
+      <div className="min-h-screen bg-gray-50">
+        {/* Header */}
+        <header className="bg-white border-b">
+          <div className="container mx-auto px-4 py-4">
+            <div className="flex items-center space-x-4">
+              <Link href="/">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="flex items-center space-x-2"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  <span>Back</span>
+                </Button>
+              </Link>
+              <h1 className="text-xl md:text-2xl font-bold text-gray-900">
+                Create New Post
+              </h1>
+            </div>
           </div>
-        </div>
-      </header>
+        </header>
 
-      {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
-        <div className="max-w-2xl mx-auto">
-          <Card>
-            <CardHeader>
-              <CardTitle>Share Your Discovery</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Title */}
-                <div className="space-y-2">
-                  <Label htmlFor="title">Title *</Label>
-                  <Input
-                    id="title"
-                    placeholder="Give your post a catchy title..."
-                    value={formData.title}
-                    onChange={(e) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        title: e.target.value,
-                      }))
-                    }
-                    required
-                  />
-                </div>
-
-                {/* Original Link */}
-                <div className="space-y-2">
-                  <Label htmlFor="originalLink">Original Link *</Label>
-                  <Input
-                    id="originalLink"
-                    type="url"
-                    placeholder="https://instagram.com/reel/... or https://youtube.com/watch?v=..."
-                    value={formData.originalLink}
-                    onChange={(e) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        originalLink: e.target.value,
-                      }))
-                    }
-                    required
-                  />
-                  <p className="text-xs text-gray-500">
-                    Paste the link to the Instagram reel, YouTube video, or
-                    other social media content
-                  </p>
-                </div>
-
-                {/* Content */}
-                <div className="space-y-2">
-                  <Label htmlFor="content">Your Thoughts *</Label>
-                  <Textarea
-                    id="content"
-                    placeholder="What inspired you about this content? Share your thoughts, insights, or how it affected you..."
-                    className="min-h-[120px] resize-none"
-                    value={formData.content}
-                    onChange={(e) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        content: e.target.value,
-                      }))
-                    }
-                    required
-                  />
-                </div>
-
-                {/* Images */}
-                <div className="space-y-2">
-                  <Label>Images (Optional)</Label>
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                    <input
-                      type="file"
-                      multiple
-                      accept="image/*"
-                      onChange={handleImageUpload}
-                      className="hidden"
-                      id="image-upload"
+        {/* Main Content */}
+        <main className="container mx-auto px-4 py-8">
+          <div className="max-w-2xl mx-auto">
+            <Card>
+              <CardHeader>
+                <CardTitle>Share Your Discovery</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  {/* Title */}
+                  <div className="space-y-2">
+                    <Label htmlFor="title">Title *</Label>
+                    <Input
+                      id="title"
+                      placeholder="Title"
+                      value={formData.title}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          title: e.target.value,
+                        }))
+                      }
+                      required
                     />
-                    <label htmlFor="image-upload" className="cursor-pointer">
-                      <Upload className="w-8 h-8 mx-auto mb-2 text-gray-400" />
-                      <p className="text-sm text-gray-600">
-                        Click to upload images or drag and drop
-                      </p>
-                      <p className="text-xs text-gray-400 mt-1">
-                        PNG, JPG, GIF up to 10MB each
-                      </p>
-                    </label>
                   </div>
 
-                  {/* Image Preview */}
-                  {selectedImages.length > 0 && (
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
-                      {selectedImages.map((image, index) => (
-                        <div key={index} className="relative group">
+                  {/* Original Link */}
+                  <div className="space-y-2">
+                    <Label htmlFor="originalLink">Original Link *</Label>
+                    <Input
+                      id="originalLink"
+                      type="url"
+                      placeholder="https://instagram.com/reel/... or https://youtube.com/watch?v=..."
+                      value={formData.originalLink}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          originalLink: e.target.value,
+                        }))
+                      }
+                      required
+                    />
+                    <p className="text-xs text-gray-500">
+                      Paste the link to the Instagram reel, YouTube video, or
+                      other social media content
+                    </p>
+                  </div>
+
+                  {/* Content */}
+                  <div className="space-y-2">
+                    <Label htmlFor="content">Your Thoughts *</Label>
+                    <Textarea
+                      id="content"
+                      placeholder="What inspired you about this content? Share your thoughts, insights, or how it affected you..."
+                      className="min-h-[120px] resize-none"
+                      value={formData.content}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          content: e.target.value,
+                        }))
+                      }
+                      required
+                    />
+                  </div>
+
+                  {/* Images */}
+                  <div className="space-y-2">
+                    <Label>Image *</Label>
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        className="hidden"
+                        id="image-upload"
+                      />
+                      <label htmlFor="image-upload" className="cursor-pointer">
+                        <Upload className="w-8 h-8 mx-auto mb-2 text-gray-400" />
+                        <p className="text-sm text-gray-600">
+                          Click to upload an image or drag and drop
+                        </p>
+                        <p className="text-xs text-gray-400 mt-1">
+                          PNG, JPG, GIF up to 50MB
+                        </p>
+                      </label>
+                    </div>
+
+                    {/* Image Preview*/}
+                    {selectedImages.length > 0 && (
+                      <div className="mt-4">
+                        <div className="relative group inline-block">
                           <Image
-                            src={image || "/placeholder.svg"}
-                            alt={`Upload ${index + 1}`}
-                            width={200}
-                            height={150}
-                            className="w-full h-24 object-cover rounded-lg"
+                            src={selectedImages[0] || "/placeholder.svg"}
+                            alt="Upload preview"
+                            width={300}
+                            height={200}
+                            className="w-full max-w-sm h-48 object-cover rounded-lg"
                           />
                           <button
                             type="button"
-                            onClick={() => removeImage(index)}
-                            className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                            onClick={() => removeImage(0)}
+                            className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
                           >
-                            <X className="w-3 h-3" />
+                            <X className="w-4 h-4" />
                           </button>
                         </div>
-                      ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Executed Date */}
+                  <div className="space-y-2">
+                    <Label htmlFor="executedDate">Executed Date *</Label>
+                    <Input
+                      id="executedDate"
+                      type="date"
+                      value={formData.executedDate}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          executedDate: e.target.value,
+                        }))
+                      }
+                      required
+                    />
+                  </div>
+
+                  {/* Category */}
+                  <div className="space-y-2">
+                    <Label htmlFor="category">Category/Tag *</Label>
+                    <Select
+                      value={formData.category}
+                      onValueChange={(value) =>
+                        setFormData((prev) => ({ ...prev, category: value }))
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {categories.map((category) => (
+                          <SelectItem key={category} value={category}>
+                            {category}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Message Display */}
+                  {(message || imageUpload.error) && (
+                    <div
+                      className={`p-4 rounded-lg text-sm ${
+                        isError || imageUpload.error
+                          ? "bg-red-50 text-red-700 border border-red-200"
+                          : "bg-green-50 text-green-700 border border-green-200"
+                      }`}
+                    >
+                      {message || imageUpload.error}
                     </div>
                   )}
-                </div>
 
-                {/* Published Date */}
-                <div className="space-y-2">
-                  <Label htmlFor="executedDate">Executed Date *</Label>
-                  <Input
-                    id="executedDate"
-                    type="date"
-                    value={formData.executedDate}
-                    onChange={(e) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        executedDate: e.target.value,
-                      }))
-                    }
-                    required
-                  />
-                </div>
-
-                {/* Category */}
-                <div className="space-y-2">
-                  <Label htmlFor="category">Category/Tag *</Label>
-                  <Select
-                    value={formData.category}
-                    onValueChange={(value) =>
-                      setFormData((prev) => ({ ...prev, category: value }))
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {categories.map((category) => (
-                        <SelectItem key={category} value={category}>
-                          {category}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Submit Button */}
-                <div className="flex flex-col sm:flex-row gap-3 pt-4">
-                  <Button type="submit" className="flex-1">
-                    Publish Post
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="flex-1 bg-transparent"
-                  >
-                    Save as Draft
-                  </Button>
-                </div>
-              </form>
-            </CardContent>
-          </Card>
-        </div>
-      </main>
-    </div>
+                  {/* Submit Button */}
+                  <div className="flex flex-col sm:flex-row gap-3 pt-4">
+                    <Button
+                      type="submit"
+                      className="flex-1"
+                      disabled={loading || imageUpload.uploading}
+                    >
+                      {loading
+                        ? "Publishing..."
+                        : imageUpload.uploading
+                        ? "Uploading..."
+                        : "Publish Post"}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="flex-1 bg-transparent"
+                      onClick={handleSaveAsDraft}
+                      disabled={loading}
+                    >
+                      Save as Draft
+                    </Button>
+                  </div>
+                </form>
+              </CardContent>
+            </Card>
+          </div>
+        </main>
+      </div>
+    </ProtectedRoute>
   );
 }
