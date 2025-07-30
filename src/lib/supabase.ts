@@ -1,5 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
-import { customStorageAdapter } from "./customStorageAdapter";
+import { customStorageAdapter } from "./custom-storage-adapter";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
