@@ -29,11 +29,20 @@ import { ProtectedRoute } from "@/src/components/ProtectedRoute";
 import { useImageUpload } from "@/src/hooks/useImageUpload";
 import {
   usePostOperations,
-  CreatePostData,
+  UpdatePostData,
 } from "@/src/hooks/usePostOperations";
+import { Post } from "@/src/lib/posts";
 import { POST_CATEGORIES } from "@/constants";
 
-export default function CreatePostPage() {
+interface EditPostPageProps {
+  params: Promise<{
+    id: string;
+  }>;
+}
+
+export default function EditPostPage({ params }: EditPostPageProps) {
+  const [post, setPost] = useState<Post | null>(null);
+  const [loadingPost, setLoadingPost] = useState(true);
   const [selectedImages, setSelectedImages] = useState<string[]>([]);
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [formData, setFormData] = useState({
@@ -61,7 +70,48 @@ export default function CreatePostPage() {
     }
   }, [user, authLoading, router]);
 
-  if (authLoading) {
+  useEffect(() => {
+    async function fetchPost() {
+      try {
+        const resolvedParams = await params;
+        const response = await fetch(`/api/posts/${resolvedParams.id}`);
+        const result = await response.json();
+
+        if (!response.ok || !result.success) {
+          router.push("/feed");
+          return;
+        }
+
+        const postData = result.data;
+        setPost(postData);
+
+        // Pre-populate form with existing data
+        setFormData({
+          title: postData.title || "",
+          originalLink: postData.bookmark_url || "",
+          content: postData.review || "",
+          executedDate: postData.executed_at
+            ? postData.executed_at.split("T")[0]
+            : "",
+          category: postData.category || "",
+        });
+
+        // Set existing image if present
+        if (postData.images) {
+          setSelectedImages([postData.images]);
+        }
+      } catch (err) {
+        console.error("Failed to fetch post:", err);
+        router.push("/feed");
+      } finally {
+        setLoadingPost(false);
+      }
+    }
+
+    fetchPost();
+  }, [params, router]);
+
+  if (authLoading || loadingPost) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
@@ -69,7 +119,7 @@ export default function CreatePostPage() {
     );
   }
 
-  if (!user) {
+  if (!user || !post) {
     return null;
   }
 
@@ -80,9 +130,12 @@ export default function CreatePostPage() {
 
       try {
         // Clear previous image if exists (for single image mode)
-        selectedImages.forEach((imageUrl) => URL.revokeObjectURL(imageUrl));
+        selectedImages.forEach((imageUrl) => {
+          if (imageUrl.startsWith("blob:")) {
+            URL.revokeObjectURL(imageUrl);
+          }
+        });
 
-        // TODO: implement multiple image support
         const imageUrl = URL.createObjectURL(file);
         setSelectedImages([imageUrl]);
         setImageFiles([file]);
@@ -94,8 +147,10 @@ export default function CreatePostPage() {
   };
 
   const removeImage = (index: number) => {
-    // Revoke object URL to prevent memory leaks
-    URL.revokeObjectURL(selectedImages[index]);
+    const imageUrl = selectedImages[index];
+    if (imageUrl.startsWith("blob:")) {
+      URL.revokeObjectURL(imageUrl);
+    }
     setSelectedImages((prev) => prev.filter((_, i) => i !== index));
     setImageFiles((prev) => prev.filter((_, i) => i !== index));
   };
@@ -103,47 +158,18 @@ export default function CreatePostPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!user) return;
+    if (!user || !post) return;
 
-    const createPostData: CreatePostData = {
+    const updatePostData: UpdatePostData = {
+      id: String(post.id),
       title: formData.title,
       originalLink: formData.originalLink,
       content: formData.content,
       executedDate: formData.executedDate,
       category: formData.category,
-      userId: user.id,
     };
 
-    await postOperations.createPostHandler(createPostData, imageFiles);
-
-    // Reset form on success
-    if (postOperations.success) {
-      setFormData({
-        title: "",
-        originalLink: "",
-        content: "",
-        executedDate: "",
-        category: "",
-      });
-      setSelectedImages([]);
-      setImageFiles([]);
-      imageUpload.resetState();
-    }
-  };
-
-  const handleSaveAsDraft = async () => {
-    if (!user) return;
-
-    const createPostData: CreatePostData = {
-      title: formData.title,
-      originalLink: formData.originalLink,
-      content: formData.content,
-      executedDate: formData.executedDate,
-      category: formData.category,
-      userId: user.id,
-    };
-
-    await postOperations.saveDraftHandler(createPostData, imageFiles);
+    await postOperations.updatePostHandler(updatePostData, imageFiles);
   };
 
   return (
@@ -153,18 +179,18 @@ export default function CreatePostPage() {
         <header className="bg-white border-b">
           <div className="container mx-auto px-4 py-4">
             <div className="flex items-center space-x-4">
-              <Link href="/">
+              <Link href={`/post/${post.id}`}>
                 <Button
                   variant="ghost"
                   size="sm"
                   className="flex items-center space-x-2"
                 >
                   <ArrowLeft className="w-4 h-4" />
-                  <span>Back</span>
+                  <span>Back to Post</span>
                 </Button>
               </Link>
               <h1 className="text-xl md:text-2xl font-bold text-gray-900">
-                Create New Post
+                Edit Post
               </h1>
             </div>
           </div>
@@ -175,7 +201,7 @@ export default function CreatePostPage() {
           <div className="max-w-2xl mx-auto">
             <Card>
               <CardHeader>
-                <CardTitle>Share Your Discovery</CardTitle>
+                <CardTitle>Edit Your Post</CardTitle>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-6">
@@ -238,7 +264,7 @@ export default function CreatePostPage() {
 
                   {/* Images */}
                   <div className="space-y-2">
-                    <Label>Image *</Label>
+                    <Label>Image</Label>
                     <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors">
                       <input
                         type="file"
@@ -250,10 +276,11 @@ export default function CreatePostPage() {
                       <label htmlFor="image-upload" className="cursor-pointer">
                         <Upload className="w-8 h-8 mx-auto mb-2 text-gray-400" />
                         <p className="text-sm text-gray-600">
-                          Click to upload an image or drag and drop
+                          Click to upload a new image or drag and drop
                         </p>
                         <p className="text-xs text-gray-400 mt-1">
-                          PNG, JPG, GIF up to 50MB
+                          PNG, JPG, GIF up to 50MB (Leave empty to keep current
+                          image)
                         </p>
                       </label>
                     </div>
@@ -334,7 +361,7 @@ export default function CreatePostPage() {
                       {postOperations.error ||
                         imageUpload.error ||
                         (postOperations.success &&
-                          "Post created successfully!")}
+                          "Post updated successfully!")}
                     </div>
                   )}
 
@@ -346,19 +373,19 @@ export default function CreatePostPage() {
                       disabled={postOperations.loading || imageUpload.uploading}
                     >
                       {postOperations.loading
-                        ? "Publishing..."
+                        ? "Updating..."
                         : imageUpload.uploading
                         ? "Uploading..."
-                        : "Publish Post"}
+                        : "Update Post"}
                     </Button>
                     <Button
                       type="button"
                       variant="outline"
                       className="flex-1 bg-transparent"
-                      onClick={handleSaveAsDraft}
+                      onClick={() => router.push(`/post/${post.id}`)}
                       disabled={postOperations.loading}
                     >
-                      Save as Draft
+                      Cancel
                     </Button>
                   </div>
                 </form>

@@ -1,13 +1,24 @@
 "use client";
 
 import { Button } from "@/src/components/ui/button";
-import { ArrowLeft, ExternalLink, Calendar, Tag, Share } from "lucide-react";
+import {
+  ArrowLeft,
+  ExternalLink,
+  Calendar,
+  Tag,
+  Share,
+  Edit,
+  MoreHorizontal,
+  Trash2,
+} from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ProtectedRoute } from "@/src/components/ProtectedRoute";
 import { PostImage } from "@/src/components/PostImage";
 import { useEffect, useState } from "react";
 import { Post } from "@/src/lib/posts";
+import { useAuth } from "@/src/contexts/AuthContext";
+import { usePostOperations } from "@/src/hooks/usePostOperations";
 
 interface PostPageProps {
   params: Promise<{
@@ -19,6 +30,10 @@ export default function PostPage({ params }: PostPageProps) {
   const [post, setPost] = useState<Post | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showMenu, setShowMenu] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const { user } = useAuth();
+  const postOperations = usePostOperations();
 
   useEffect(() => {
     async function fetchPost() {
@@ -92,28 +107,79 @@ export default function PostPage({ params }: PostPageProps) {
                 {post.title}
               </h1>
 
-              {/* Meta Information */}
-              <div className="flex flex-wrap items-center gap-6 text-sm text-gray-600 mb-6">
-                <div className="flex items-center space-x-2">
-                  <Calendar className="w-4 h-4" />
-                  <span>{new Date(post.created_at).toLocaleDateString()}</span>
-                </div>
-
-                {post.executed_at && (
+              {/* Meta Information and Actions */}
+              <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
+                {/* Meta Information */}
+                <div className="flex flex-wrap items-center gap-4 sm:gap-6 text-sm text-gray-600">
                   <div className="flex items-center space-x-2">
                     <Calendar className="w-4 h-4" />
                     <span>
-                      Executed {new Date(post.executed_at).toLocaleDateString()}
+                      {new Date(post.created_at).toLocaleDateString()}
                     </span>
                   </div>
-                )}
 
-                <div className="flex items-center space-x-2">
-                  <Tag className="w-4 h-4" />
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
-                    {post.category}
-                  </span>
+                  {post.executed_at && (
+                    <div className="flex items-center space-x-2">
+                      <Calendar className="w-4 h-4" />
+                      <span>
+                        Executed{" "}
+                        {new Date(post.executed_at).toLocaleDateString()}
+                      </span>
+                    </div>
+                  )}
+
+                  <div className="flex items-center space-x-2">
+                    <Tag className="w-4 h-4" />
+                    <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                      {post.category}
+                    </span>
+                  </div>
                 </div>
+                {user && post && user.id === post.user_id && (
+                  <div className="relative flex-shrink-0">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 w-8 p-0 hover:bg-gray-100"
+                      onClick={() => setShowMenu(!showMenu)}
+                    >
+                      <MoreHorizontal className="w-4 h-4" />
+                    </Button>
+
+                    {/* Dropdown Menu */}
+                    {showMenu && (
+                      <>
+                        {/* Background overlay to close menu when clicking outside */}
+                        <div
+                          className="fixed inset-0 z-10"
+                          onClick={() => setShowMenu(false)}
+                        />
+
+                        {/* Menu dropdown - positioned to stay within viewport */}
+                        <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-md shadow-lg border border-gray-200 py-1 z-20 min-w-max">
+                          <Link
+                            href={`/post/${post.id}/edit`}
+                            className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                            onClick={() => setShowMenu(false)}
+                          >
+                            <Edit className="w-4 h-4 mr-3" />
+                            Edit Post
+                          </Link>
+                          <button
+                            className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                            onClick={() => {
+                              setShowMenu(false);
+                              setShowDeleteModal(true);
+                            }}
+                          >
+                            <Trash2 className="w-4 h-4 mr-3" />
+                            Delete Post
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Original Content (Bookmark URL) */}
@@ -186,6 +252,62 @@ export default function PostPage({ params }: PostPageProps) {
             </div>
           </article>
         </main>
+
+        {/* Delete Confirmation Modal */}
+        {showDeleteModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                Delete Post
+              </h3>
+              <p className="text-gray-600 mb-6">
+                Are you sure you want to delete this post? This action cannot be
+                undone.
+              </p>
+
+              {/* Error/Success Message */}
+              {postOperations.error && (
+                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
+                  <p className="text-sm text-red-700">{postOperations.error}</p>
+                </div>
+              )}
+
+              {postOperations.success && (
+                <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-md">
+                  <p className="text-sm text-green-700">
+                    Post deleted successfully! Redirecting...
+                  </p>
+                </div>
+              )}
+
+              <div className="flex space-x-3">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setShowDeleteModal(false);
+                    postOperations.resetState();
+                  }}
+                  disabled={postOperations.loading}
+                  className="flex-1"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={() => {
+                    if (post) {
+                      postOperations.deletePostHandler(post.id.toString());
+                    }
+                  }}
+                  disabled={postOperations.loading}
+                  className="flex-1"
+                >
+                  {postOperations.loading ? "Deleting..." : "Delete"}
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </ProtectedRoute>
   );
