@@ -10,7 +10,7 @@ export function SignOutButton() {
 
   return (
     <Button onClick={signOut} variant="outline">
-      Sign Out
+      Sign out
     </Button>
   );
 }

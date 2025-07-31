@@ -7,6 +7,7 @@ import Link from "next/link";
 import { ProtectedRoute } from "@/src/components/ProtectedRoute";
 import { getPosts } from "@/src/lib/posts";
 import { PhotoTile } from "@/src/components/PhotoTile";
+import { SignOutButton } from "@/src/components/SignOutButton";
 
 export default async function FeedPage() {
   const { posts, error } = await getPosts();
@@ -33,12 +34,15 @@ export default async function FeedPage() {
                   Feed
                 </h1>
               </div>
-              <Link href="/create">
-                <Button className="flex items-center space-x-2">
-                  <Plus className="w-4 h-4" />
-                  <span className="hidden sm:inline">Create Post</span>
-                </Button>
-              </Link>
+              <div className="flex items-center space-x-2">
+                <Link href="/create">
+                  <Button className="flex items-center space-x-2">
+                    <Plus className="w-4 h-4" />
+                    <span className="hidden sm:inline">Create Post</span>
+                  </Button>
+                </Link>
+                <SignOutButton />
+              </div>
             </div>
           </div>
         </header>

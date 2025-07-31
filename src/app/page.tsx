@@ -14,9 +14,12 @@ import Youtube from "@/public/youtube.svg";
 import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
+import { useAuth } from "@/src/contexts/AuthContext";
+import { SignOutButton } from "@/src/components/SignOutButton";
 
 export default function LandingPage() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { user } = useAuth();
 
   const carouselItems = [
     {
@@ -65,19 +68,41 @@ export default function LandingPage() {
 
               {/* Desktop Navigation */}
               <div className="hidden md:flex items-center space-x-3">
-                <Button
-                  asChild
-                  variant="ghost"
-                  className="text-white/80 hover:text-white hover:bg-white/10"
-                >
-                  <Link href="/signin">Sign In</Link>
-                </Button>
-                <Button
-                  asChild
-                  className="bg-white text-gray-900 hover:bg-gray-100"
-                >
-                  <Link href="/signup">Sign Up</Link>
-                </Button>
+                {user ? (
+                  <>
+                    <Button
+                      asChild
+                      variant="ghost"
+                      className="text-white/80 hover:text-white hover:bg-white/10"
+                    >
+                      <Link href="/feed">Feed</Link>
+                    </Button>
+                    <Button
+                      asChild
+                      variant="ghost"
+                      className="text-white/80 hover:text-white hover:bg-white/10"
+                    >
+                      <Link href="/create">Create</Link>
+                    </Button>
+                    <SignOutButton />
+                  </>
+                ) : (
+                  <>
+                    <Button
+                      asChild
+                      variant="ghost"
+                      className="text-white/80 hover:text-white hover:bg-white/10"
+                    >
+                      <Link href="/signin">Sign In</Link>
+                    </Button>
+                    <Button
+                      asChild
+                      className="bg-white text-gray-900 hover:bg-gray-100"
+                    >
+                      <Link href="/signup">Sign Up</Link>
+                    </Button>
+                  </>
+                )}
               </div>
 
               {/* Mobile Hamburger Button */}
@@ -151,21 +176,27 @@ export default function LandingPage() {
               </div>
 
               <div className="border-t pt-8 space-y-4">
-                <Button
-                  asChild
-                  variant="ghost"
-                  className="w-full justify-start text-lg text-gray-700 hover:text-gray-900 hover:bg-gray-50"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  <Link href="/signin">Sign In</Link>
-                </Button>
-                <Button
-                  asChild
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-lg"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  <Link href="/signup">Sign Up</Link>
-                </Button>
+                {user ? (
+                  <SignOutButton />
+                ) : (
+                  <>
+                    <Button
+                      asChild
+                      variant="ghost"
+                      className="w-full justify-start text-lg text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      <Link href="/signin">Sign In</Link>
+                    </Button>
+                    <Button
+                      asChild
+                      className="w-full bg-blue-600 hover:bg-blue-700 text-lg"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      <Link href="/signup">Sign Up</Link>
+                    </Button>
+                  </>
+                )}
               </div>
             </div>
           </div>
