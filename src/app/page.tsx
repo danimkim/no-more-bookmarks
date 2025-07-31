@@ -5,9 +5,11 @@ import {
   ArrowRight,
   BookOpen,
   Share2,
-  ExternalLink,
   X,
   PlayCircle,
+  Zap,
+  Heart,
+  Clock,
 } from "lucide-react";
 import Instagram from "@/public/instagram.svg";
 import Youtube from "@/public/youtube.svg";
@@ -22,6 +24,33 @@ export default function LandingPage() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { user, loading } = useAuth();
   const router = useRouter();
+
+  const features = [
+    {
+      icon: <Zap className="w-6 h-6 text-blue-600" />,
+      title: "Instant Capture",
+      description:
+        "Save any social media content with just a link. No more losing track of inspiring posts.",
+    },
+    {
+      icon: <Heart className="w-6 h-6 text-red-600" />,
+      title: "Personal Reflection",
+      description:
+        "Add your thoughts and insights to create meaningful connections with saved content.",
+    },
+    {
+      icon: <BookOpen className="w-6 h-6 text-green-600" />,
+      title: "Organized Archive",
+      description:
+        "Categorize and search through your collection effortlessly. Your inspiration, organized.",
+    },
+    {
+      icon: <Clock className="w-6 h-6 text-purple-600" />,
+      title: "Never Lose Content",
+      description:
+        "No more scrolling endlessly to find that one post. Everything is saved and searchable.",
+    },
+  ];
 
   useEffect(() => {
     if (!loading && user) {
@@ -159,53 +188,27 @@ export default function LandingPage() {
 
             {/* Menu Items */}
             <div className="flex-1 space-y-8">
-              <div className="space-y-6">
-                <Link
-                  href="#"
-                  className="block text-xl font-medium text-gray-900 hover:text-blue-600 transition-colors"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  About
-                </Link>
-                <Link
-                  href="/feed"
-                  className="block text-xl font-medium text-gray-900 hover:text-blue-600 transition-colors"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  Browse Posts
-                </Link>
-                <Link
-                  href="/create"
-                  className="block text-xl font-medium text-gray-900 hover:text-blue-600 transition-colors"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  Create Post
-                </Link>
-              </div>
-
-              <div className="border-t pt-8 space-y-4">
-                {user ? (
-                  <SignOutButton />
-                ) : (
-                  <>
-                    <Button
-                      asChild
-                      variant="ghost"
-                      className="w-full justify-start text-lg text-gray-700 hover:text-gray-900 hover:bg-gray-50"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      <Link href="/signin">Sign In</Link>
-                    </Button>
-                    <Button
-                      asChild
-                      className="w-full bg-blue-600 hover:bg-blue-700 text-lg"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      <Link href="/signup">Sign Up</Link>
-                    </Button>
-                  </>
-                )}
-              </div>
+              {user ? (
+                <SignOutButton />
+              ) : (
+                <>
+                  <Button
+                    asChild
+                    variant="ghost"
+                    className="w-full justify-start text-lg text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <Link href="/signin">Sign In</Link>
+                  </Button>
+                  <Button
+                    asChild
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-lg"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <Link href="/signup">Sign Up</Link>
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -219,201 +222,123 @@ export default function LandingPage() {
             <p className="text-xl md:text-3xl mb-8 font-light drop-shadow-md">
               Stop saving it, start living it
             </p>
-            <div className="flex flex-col lg:flex-row gap-4 justify-center items-center">
-              <Link href="/feed">
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="border-white text-white hover:bg-white hover:text-blue-600 text-lg px-8 py-3 bg-transparent"
-                >
-                  <BookOpen className="w-5 h-5 mr-2" />
-                  Explore Posts
-                </Button>
-              </Link>
-            </div>
           </div>
         </div>
       </section>
 
-      {/* Motivational Section with Carousel */}
-      <section className="py-16 md:py-20 bg-gray-50">
+      {/* Features & Benefits Section */}
+      <section className="py-32 bg-white">
         <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto text-center mb-12">
-            <p className="text-lg md:text-xl text-gray-600 mb-6">
-              Ever saved countless posts about your dream travel destination,
-              only to find yourself still dreaming?
-            </p>
-            <div className="relative">
-              <div className="flex overflow-x-auto snap-x snap-mandatory pb-6 scrollbar-hide lg:justify-center">
-                {carouselItems.map((item) => (
-                  <div
-                    key={item.id}
-                    className="flex-shrink-0 w-72 snap-center mx-3"
-                  >
-                    <div className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100">
-                      <div className="aspect-[4/3] overflow-hidden">
-                        <Image
-                          src={item.image || "/placeholder.svg"}
-                          alt={item.title}
-                          width={300}
-                          height={225}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      <div className="p-4">
-                        <h3 className="font-semibold text-base text-gray-900 mb-2 line-clamp-2">
-                          {item.title}
-                        </h3>
-                        <p className="text-sm text-gray-600 mb-3">
-                          {item.description}
-                        </p>
-                        <div className="flex items-center text-sm text-gray-600">
-                          {item.icon}
-                          <span className="ml-2">{item.type}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 mt-12">
-              Beyond Bookmarks
+          {/* Main Value Proposition */}
+          <div className="text-center mb-32">
+            <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-6">
+              Turn Inspiration Into Action
             </h2>
-            <p className="text-lg text-gray-600">
-              No more bookmarks helps you turn inspiration into action. Document
-              your real-life experiences, reflect on what truly matters, and
-              build a personal archive of your lived adventures.
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
+              Stop letting great content disappear into the void of endless
+              bookmarks. Create a meaningful archive where every saved post
+              becomes a stepping stone to your next adventure.
             </p>
+            <Link href="/signup">
+              <Button size="lg" className="text-lg px-8 py-4">
+                Start Your Archive Free
+                <ArrowRight className="w-5 h-5 ml-2" />
+              </Button>
+            </Link>
+          </div>
+
+          {/* Features Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
+            {features.map((feature, index) => (
+              <div
+                key={index}
+                className="text-center p-6 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors"
+              >
+                <div className="flex justify-center mb-4">{feature.icon}</div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                  {feature.title}
+                </h3>
+                <p className="text-gray-600 text-sm leading-relaxed">
+                  {feature.description}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Guide Section */}
-      <section className="py-16 md:py-20 bg-white">
-        {/* Call to Action */}
-        <div className="text-center mt-16">
-          <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-8 md:p-12 text-white">
-            <h3 className="text-2xl md:text-3xl font-bold mb-4">
-              Ready to Start Your Archive?
-            </h3>
-            <p className="text-lg md:text-xl mb-8 opacity-90 max-w-2xl mx-auto">
-              Don’t just save ideas — act on them. Build your archive of
-              progress.
+      {/* Call to Action Section */}
+      <section className="py-20 bg-gradient-to-r from-blue-600 to-purple-600">
+        <div className="container mx-auto px-4 text-center">
+          <div className="max-w-3xl mx-auto text-white">
+            <h2 className="text-3xl md:text-4xl font-bold mb-6">
+              Ready to Transform Your Digital Inspiration?
+            </h2>
+            <p className="text-xl mb-8 opacity-90">
+              Don't let another great idea stay buried in your bookmarks.
+              Transform from a content saver into an experience maker. Begin
+              your change today.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/create">
+              <Link href="/signup">
                 <Button
                   size="lg"
-                  className="bg-white text-blue-600 hover:bg-gray-100 text-lg px-8 py-3"
+                  className="bg-white text-blue-600 hover:bg-gray-100 text-lg px-8 py-4"
                 >
-                  Create Your First Post
+                  Get Started Free
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </Button>
               </Link>
-              <Link href="/feed">
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="border-white text-white hover:bg-white hover:text-blue-600 text-lg px-8 py-3 bg-transparent"
-                >
-                  <BookOpen className="w-5 h-5 mr-2" />
-                  Explore Examples
-                </Button>
-              </Link>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Footer */}
+      {/* Simple Footer */}
       <footer className="bg-gray-900 text-white py-12">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div className="md:col-span-2">
-              <h3 className="text-xl font-bold mb-4">No more bookmarks</h3>
-              <p className="text-gray-400 mb-4 max-w-md">
-                Your personal archive for social media inspiration. Save,
-                organize, and reflect on the content that matters to you.
+          <div className="flex flex-col md:flex-row items-center justify-between">
+            <div className="mb-6 md:mb-0">
+              <h3 className="text-xl font-bold mb-2">No more bookmarks</h3>
+              <p className="text-gray-400">
+                Your personal archive for digital inspiration
               </p>
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-8">
+              <div className="flex space-x-6 text-sm">
+                <Link
+                  href="#"
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  Privacy
+                </Link>
+                <Link
+                  href="#"
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  Terms
+                </Link>
+                <Link
+                  href="#"
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  Support
+                </Link>
+              </div>
               <div className="flex space-x-4">
                 <Button
                   variant="ghost"
                   size="sm"
                   className="text-gray-400 hover:text-white p-2"
                 >
-                  <ExternalLink className="w-5 h-5" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-gray-400 hover:text-white p-2"
-                >
-                  <Share2 className="w-5 h-5" />
+                  <Share2 className="w-4 h-4" />
                 </Button>
               </div>
             </div>
-
-            <div>
-              <h4 className="font-semibold mb-4">Platform</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li>
-                  <Link
-                    href="/feed"
-                    className="hover:text-white transition-colors"
-                  >
-                    Browse Posts
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/create"
-                    className="hover:text-white transition-colors"
-                  >
-                    Create Post
-                  </Link>
-                </li>
-                <li>
-                  <Link href="#" className="hover:text-white transition-colors">
-                    Categories
-                  </Link>
-                </li>
-                <li>
-                  <Link href="#" className="hover:text-white transition-colors">
-                    Search
-                  </Link>
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="font-semibold mb-4">Support</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li>
-                  <Link href="#" className="hover:text-white transition-colors">
-                    Help Center
-                  </Link>
-                </li>
-                <li>
-                  <Link href="#" className="hover:text-white transition-colors">
-                    Privacy Policy
-                  </Link>
-                </li>
-                <li>
-                  <Link href="#" className="hover:text-white transition-colors">
-                    Terms of Service
-                  </Link>
-                </li>
-                <li>
-                  <Link href="#" className="hover:text-white transition-colors">
-                    Contact Us
-                  </Link>
-                </li>
-              </ul>
-            </div>
           </div>
 
-          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400 text-sm">
             <p>
               &copy; {new Date().getFullYear()} No more bookmarks. All rights
               reserved.
