@@ -13,13 +13,21 @@ import Instagram from "@/public/instagram.svg";
 import Youtube from "@/public/youtube.svg";
 import Link from "next/link";
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/src/contexts/AuthContext";
 import { SignOutButton } from "@/src/components/SignOutButton";
 
 export default function LandingPage() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!loading && user) {
+      router.push("/feed");
+    }
+  }, [user, loading, router]);
 
   const carouselItems = [
     {
@@ -235,7 +243,6 @@ export default function LandingPage() {
               Ever saved countless posts about your dream travel destination,
               only to find yourself still dreaming?
             </p>
-            {/* Carousel of inspiring content */}
             <div className="relative">
               <div className="flex overflow-x-auto snap-x snap-mandatory pb-6 scrollbar-hide lg:justify-center">
                 {carouselItems.map((item) => (
@@ -271,7 +278,7 @@ export default function LandingPage() {
               </div>
             </div>
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 mt-12">
-              Beyond Bookmarks: Live Your Inspiration, Archive Your Life!
+              Beyond Bookmarks
             </h2>
             <p className="text-lg text-gray-600">
               No more bookmarks helps you turn inspiration into action. Document
@@ -284,222 +291,36 @@ export default function LandingPage() {
 
       {/* Guide Section */}
       <section className="py-16 md:py-20 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              How It Works
-            </h2>
-          </div>
-
-          <div className="max-w-6xl mx-auto">
-            {/* Step 1 */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-20">
-              <div className="order-2 lg:order-1">
-                <div className="flex items-center mb-4">
-                  <div className="w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-lg mr-4">
-                    1
-                  </div>
-                  <h3 className="text-2xl font-bold text-gray-900">
-                    Find Inspiring Content
-                  </h3>
-                </div>
-                <p className="text-gray-600 text-lg leading-relaxed mb-6">
-                  Discover amazing Instagram reels, YouTube videos, TikToks, or
-                  any social media content that inspires you. Copy the link to
-                  the content you want to save and reflect on.
-                </p>
-                <ul className="space-y-2 text-gray-600">
-                  <li className="flex items-center">
-                    <div className="w-2 h-2 bg-blue-600 rounded-full mr-3"></div>
-                    Instagram reels and posts
-                  </li>
-                  <li className="flex items-center">
-                    <div className="w-2 h-2 bg-blue-600 rounded-full mr-3"></div>
-                    YouTube videos and shorts
-                  </li>
-                  <li className="flex items-center">
-                    <div className="w-2 h-2 bg-blue-600 rounded-full mr-3"></div>
-                    TikTok videos and any social content
-                  </li>
-                </ul>
-              </div>
-              <div className="order-1 lg:order-2">
-                <div className="bg-gradient-to-br from-blue-50 to-indigo-100 rounded-2xl p-8 shadow-lg">
-                  <Image
-                    src="/placeholder.svg?height=400&width=500"
-                    alt="Step 1: Finding content on social media platforms"
-                    width={500}
-                    height={400}
-                    className="w-full h-auto rounded-lg shadow-md"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Step 2 */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-20">
-              <div>
-                <div className="bg-gradient-to-br from-green-50 to-emerald-100 rounded-2xl p-8 shadow-lg">
-                  <Image
-                    src="/placeholder.svg?height=400&width=500"
-                    alt="Step 2: Create post form with title and link fields"
-                    width={500}
-                    height={400}
-                    className="w-full h-auto rounded-lg shadow-md"
-                  />
-                </div>
-              </div>
-              <div>
-                <div className="flex items-center mb-4">
-                  <div className="w-10 h-10 bg-green-600 text-white rounded-full flex items-center justify-center font-bold text-lg mr-4">
-                    2
-                  </div>
-                  <h3 className="text-2xl font-bold text-gray-900">
-                    Create Your Post
-                  </h3>
-                </div>
-                <p className="text-gray-600 text-lg leading-relaxed mb-6">
-                  Click "Start Archiving" and fill out the simple form. Add a
-                  catchy title, paste the original link, and share your thoughts
-                  about what inspired you.
-                </p>
-                <ul className="space-y-2 text-gray-600">
-                  <li className="flex items-center">
-                    <div className="w-2 h-2 bg-green-600 rounded-full mr-3"></div>
-                    Give your post a memorable title
-                  </li>
-                  <li className="flex items-center">
-                    <div className="w-2 h-2 bg-green-600 rounded-full mr-3"></div>
-                    Paste the original social media link
-                  </li>
-                  <li className="flex items-center">
-                    <div className="w-2 h-2 bg-green-600 rounded-full mr-3"></div>
-                    Write your personal thoughts and insights
-                  </li>
-                </ul>
-              </div>
-            </div>
-
-            {/* Step 3 */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-20">
-              <div className="order-2 lg:order-1">
-                <div className="flex items-center mb-4">
-                  <div className="w-10 h-10 bg-purple-600 text-white rounded-full flex items-center justify-center font-bold text-lg mr-4">
-                    3
-                  </div>
-                  <h3 className="text-2xl font-bold text-gray-900">
-                    Add Details & Media
-                  </h3>
-                </div>
-                <p className="text-gray-600 text-lg leading-relaxed mb-6">
-                  Enhance your post by uploading related images, selecting a
-                  category, and setting the published date. These details help
-                  organize your personal archive.
-                </p>
-                <ul className="space-y-2 text-gray-600">
-                  <li className="flex items-center">
-                    <div className="w-2 h-2 bg-purple-600 rounded-full mr-3"></div>
-                    Upload relevant images or screenshots
-                  </li>
-                  <li className="flex items-center">
-                    <div className="w-2 h-2 bg-purple-600 rounded-full mr-3"></div>
-                    Choose from 10+ categories
-                  </li>
-                  <li className="flex items-center">
-                    <div className="w-2 h-2 bg-purple-600 rounded-full mr-3"></div>
-                    Set the published date for organization
-                  </li>
-                </ul>
-              </div>
-              <div className="order-1 lg:order-2">
-                <div className="bg-gradient-to-br from-purple-50 to-violet-100 rounded-2xl p-8 shadow-lg">
-                  <Image
-                    src="/placeholder.svg?height=400&width=500"
-                    alt="Step 3: Adding images, categories, and date to the post"
-                    width={500}
-                    height={400}
-                    className="w-full h-auto rounded-lg shadow-md"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Step 4 */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-              <div>
-                <div className="bg-gradient-to-br from-orange-50 to-amber-100 rounded-2xl p-8 shadow-lg">
-                  <Image
-                    src="/placeholder.svg?height=400&width=500"
-                    alt="Step 4: Published post in the feed with engagement options"
-                    width={500}
-                    height={400}
-                    className="w-full h-auto rounded-lg shadow-md"
-                  />
-                </div>
-              </div>
-              <div>
-                <div className="flex items-center mb-4">
-                  <div className="w-10 h-10 bg-orange-600 text-white rounded-full flex items-center justify-center font-bold text-lg mr-4">
-                    4
-                  </div>
-                  <h3 className="text-2xl font-bold text-gray-900">
-                    Celebrate & Share
-                  </h3>
-                </div>
-                <p className="text-gray-600 text-lg leading-relaxed mb-6">
-                  Your post becomes part of your private archive — a personal
-                  space to reflect on what you’ve accomplished and stay
-                  motivated.
-                </p>
-                <ul className="space-y-2 text-gray-600">
-                  <li className="flex items-center">
-                    <div className="w-2 h-2 bg-orange-600 rounded-full mr-3"></div>
-                    Revisit your personal archive anytime
-                  </li>
-                  <li className="flex items-center">
-                    <div className="w-2 h-2 bg-orange-600 rounded-full mr-3"></div>
-                    Celebrate your progress in one place
-                  </li>
-                  <li className="flex items-center">
-                    <div className="w-2 h-2 bg-orange-600 rounded-full mr-3"></div>
-                    Optionally share your posts with others
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
-
-          {/* Call to Action */}
-          <div className="text-center mt-16">
-            <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-8 md:p-12 text-white">
-              <h3 className="text-2xl md:text-3xl font-bold mb-4">
-                Ready to Start Your Archive?
-              </h3>
-              <p className="text-lg md:text-xl mb-8 opacity-90 max-w-2xl mx-auto">
-                Don’t just save ideas — act on them. Build your archive of
-                progress.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link href="/create">
-                  <Button
-                    size="lg"
-                    className="bg-white text-blue-600 hover:bg-gray-100 text-lg px-8 py-3"
-                  >
-                    Create Your First Post
-                    <ArrowRight className="w-5 h-5 ml-2" />
-                  </Button>
-                </Link>
-                <Link href="/feed">
-                  <Button
-                    variant="outline"
-                    size="lg"
-                    className="border-white text-white hover:bg-white hover:text-blue-600 text-lg px-8 py-3 bg-transparent"
-                  >
-                    <BookOpen className="w-5 h-5 mr-2" />
-                    Explore Examples
-                  </Button>
-                </Link>
-              </div>
+        {/* Call to Action */}
+        <div className="text-center mt-16">
+          <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-8 md:p-12 text-white">
+            <h3 className="text-2xl md:text-3xl font-bold mb-4">
+              Ready to Start Your Archive?
+            </h3>
+            <p className="text-lg md:text-xl mb-8 opacity-90 max-w-2xl mx-auto">
+              Don’t just save ideas — act on them. Build your archive of
+              progress.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link href="/create">
+                <Button
+                  size="lg"
+                  className="bg-white text-blue-600 hover:bg-gray-100 text-lg px-8 py-3"
+                >
+                  Create Your First Post
+                  <ArrowRight className="w-5 h-5 ml-2" />
+                </Button>
+              </Link>
+              <Link href="/feed">
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="border-white text-white hover:bg-white hover:text-blue-600 text-lg px-8 py-3 bg-transparent"
+                >
+                  <BookOpen className="w-5 h-5 mr-2" />
+                  Explore Examples
+                </Button>
+              </Link>
             </div>
           </div>
         </div>

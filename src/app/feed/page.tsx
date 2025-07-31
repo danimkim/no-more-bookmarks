@@ -1,8 +1,5 @@
 import { Button } from "@/src/components/ui/button";
-import {
-  Plus,
-  ArrowLeft,
-} from "lucide-react";
+import { Plus } from "lucide-react";
 import Link from "next/link";
 import { ProtectedRoute } from "@/src/components/ProtectedRoute";
 import { getPosts } from "@/src/lib/posts";
@@ -20,16 +17,6 @@ export default async function FeedPage() {
           <div className="container mx-auto px-4 py-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
-                <Link href="/">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="flex items-center space-x-2"
-                  >
-                    <ArrowLeft className="w-4 h-4" />
-                    <span className="hidden sm:inline">Home</span>
-                  </Button>
-                </Link>
                 <h1 className="text-xl md:text-2xl font-bold text-gray-900">
                   Feed
                 </h1>
@@ -69,17 +56,18 @@ export default async function FeedPage() {
           {/* Posts Grid */}
           {posts.length > 0 && (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-1 md:gap-2">
-              {posts.map((post) => (
-                post.images && (
-                  <PhotoTile
-                    key={post.id}
-                    imageUrl={post.images}
-                    title={post.title}
-                    category={post.category}
-                    postId={post.id}
-                  />
-                )
-              ))}
+              {posts.map(
+                (post) =>
+                  post.images && (
+                    <PhotoTile
+                      key={post.id}
+                      imageUrl={post.images}
+                      title={post.title}
+                      category={post.category}
+                      postId={post.id}
+                    />
+                  )
+              )}
             </div>
           )}
         </main>
