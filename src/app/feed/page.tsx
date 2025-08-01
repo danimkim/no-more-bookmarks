@@ -1,11 +1,12 @@
 import { Button } from "@/src/components/ui/button";
-import { Plus, Settings } from "lucide-react";
+import { Plus } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { ProtectedRoute } from "@/src/components/ProtectedRoute";
 import { getPosts, getUserProfile } from "@/src/lib/posts";
 import { PhotoTile } from "@/src/components/PhotoTile";
 import { SignOutButton } from "@/src/components/SignOutButton";
+import { BottomNavbar } from "@/src/components/BottomNavbar";
 
 export default async function FeedPage() {
   const { posts, error } = await getPosts();
@@ -25,9 +26,6 @@ export default async function FeedPage() {
                     <span className="hidden sm:inline">New</span>
                   </Button>
                 </Link>
-                <Button size="sm" variant="outline">
-                  <Settings className="w-4 h-4" />
-                </Button>
                 <SignOutButton />
               </div>
             </div>
@@ -35,7 +33,7 @@ export default async function FeedPage() {
         </header>
 
         {/* Main Content */}
-        <main className="max-w-4xl mx-auto px-4">
+        <main className="max-w-4xl mx-auto px-4 pb-20 md:pb-0">
           {/* Profile Section */}
           <div className="py-8">
             <div className="flex flex-col md:flex-row items-center md:items-start space-y-6 md:space-y-0 md:space-x-8">
@@ -147,6 +145,8 @@ export default async function FeedPage() {
             )}
           </div>
         </main>
+
+        <BottomNavbar />
       </div>
     </ProtectedRoute>
   );
