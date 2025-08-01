@@ -18,7 +18,8 @@ export default async function FeedPage() {
         {/* Header */}
         <header className="bg-white border-b sticky top-0 z-50">
           <div className="max-w-4xl mx-auto px-4 py-3">
-            <div className="flex items-center justify-end">
+            <div className="flex items-center justify-between">
+              <span>No More Bookmarks</span>
               <SettingsDrawer />
             </div>
           </div>
