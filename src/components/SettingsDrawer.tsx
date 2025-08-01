@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/src/components/ui/button";
-import { LogOut, Trash2, X } from "lucide-react";
+import { LogOut, Trash2, X, Mail, HelpCircle } from "lucide-react";
 import { deleteUserAccountAction } from "@/src/lib/actions";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/src/lib/supabase/client";
@@ -75,7 +75,6 @@ export function SettingsDrawer() {
         className="flex items-center space-x-1"
       >
         <LogOut className="w-4 h-4" />
-        <span className="hidden sm:inline">Settings</span>
       </Button>
 
       {/* Drawer Overlay */}
@@ -131,6 +130,26 @@ export function SettingsDrawer() {
                 {isDeleting ? "Deleting..." : "Delete account"}
               </span>
             </Button>
+          </div>
+
+          {/* Support Section */}
+          <div className="border-t border-gray-200 mt-6 pt-4">
+            <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3 flex items-center">
+              <span>Help and Feedback</span>
+            </h3>
+            <div className="space-y-1">
+              <div className="flex items-center space-x-3 p-3">
+                <Mail className="w-5 h-5 text-gray-600" />
+                <div className="flex flex-col">
+                  <a
+                    href="mailto:danimkim.dev@gmail.com"
+                    className="text-sm text-gray-600 hover:text-gray-800"
+                  >
+                    danimkim.dev@gmail.com
+                  </a>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
