@@ -5,8 +5,8 @@ import Image from "next/image";
 import { ProtectedRoute } from "@/src/components/ProtectedRoute";
 import { getPosts, getUserProfile } from "@/src/lib/posts";
 import { PhotoTile } from "@/src/components/PhotoTile";
-import { SignOutButton } from "@/src/components/SignOutButton";
 import { BottomNavbar } from "@/src/components/BottomNavbar";
+import { SettingsDrawer } from "@/src/components/SettingsDrawer";
 
 export default async function FeedPage() {
   const { posts, error } = await getPosts();
@@ -19,15 +19,7 @@ export default async function FeedPage() {
         <header className="bg-white border-b sticky top-0 z-50">
           <div className="max-w-4xl mx-auto px-4 py-3">
             <div className="flex items-center justify-end">
-              <div className="flex items-center space-x-2">
-                <Link href="/create">
-                  <Button size="sm" className="flex items-center space-x-1">
-                    <Plus className="w-4 h-4" />
-                    <span className="hidden sm:inline">New</span>
-                  </Button>
-                </Link>
-                <SignOutButton />
-              </div>
+              <SettingsDrawer />
             </div>
           </div>
         </header>
