@@ -50,6 +50,57 @@ export async function getPostById(
   }
 }
 
+export interface UserProfile {
+  id: string;
+  email: string;
+  full_name?: string;
+  avatar_url?: string;
+  username?: string;
+  postCount: number;
+}
+
+export async function getUserProfile(): Promise<{
+  profile: UserProfile | null;
+  error: string | null;
+}> {
+  try {
+    const supabase = await createClient();
+
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return { profile: null, error: "Authentication required" };
+    }
+
+    const { count: postCount, error: countError } = await supabase
+      .from("posts")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", user.id);
+
+    if (countError) {
+      console.error("Failed to fetch post count:", countError);
+      return { profile: null, error: "Failed to fetch profile data" };
+    }
+
+    const profile: UserProfile = {
+      id: user.id,
+      email: user.email || "",
+      full_name: user.user_metadata?.full_name,
+      avatar_url: user.user_metadata?.avatar_url,
+      username: user.email?.split("@")[0] || "User",
+      postCount: postCount || 0,
+    };
+
+    return { profile, error: null };
+  } catch (error) {
+    console.error("Server error:", error);
+    return { profile: null, error: "An unexpected error occurred" };
+  }
+}
+
 export async function getPosts(): Promise<{
   posts: Post[];
   error: string | null;
