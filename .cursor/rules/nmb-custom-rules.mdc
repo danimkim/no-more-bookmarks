@@ -1,0 +1,36 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+
+# cursor-rules
+
+## supabase
+
+- Use `posts` table to store execution records
+- Use `profiles` table for user metadata
+- All Supabase tables assume RLS is enabled — write RLS-safe queries only
+- Store all timestamps in UTC using `timezone('utc', now())`
+- Avoid exposing Supabase Admin keys or service roles to the client
+- Use `lib/supabase.ts` to centralize client access
+
+## domain-conventions
+
+- The internal term "post" refers to a user’s execution record of a saved bookmark
+- Each post should contain: title, link, executed date, reflection, image (optional), visibility flag
+- posts table ≠ blog post; this is about personal experience execution logs
+
+## ui
+
+- Design mobile-first using a base width of **390px**
+- Use `Shadcn UI` components (Button, Card, Dialog, Form, etc.)
+- Layout and responsiveness are handled with TailwindCSS utility classes
+- Keep UI minimal, warm, and user-centered
+
+## dx
+
+- Prioritize simplicity, clarity, and fast iteration for solo development
+- Avoid unnecessary abstractions or premature optimization
+- Prefer clear naming and composable structure over generalization
+- Add only essential dependencies; keep the stack clean
