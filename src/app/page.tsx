@@ -6,7 +6,6 @@ import {
   BookOpen,
   Share2,
   X,
-  PlayCircle,
   Zap,
   Heart,
   Clock,
@@ -57,33 +56,6 @@ export default function LandingPage() {
       router.push("/feed");
     }
   }, [user, loading, router]);
-
-  const carouselItems = [
-    {
-      id: 1,
-      image: "/images/instagram-bookmarked.png",
-      title: "Instagram Post Saved",
-      description: "Bookmark inspiring posts to revisit later.",
-      type: "Instagram",
-      icon: <Image src={Instagram} alt="Instagram" className="w-4 h-4" />,
-    },
-    {
-      id: 2,
-      image: "/images/youtube-save-later.png",
-      title: "YouTube Video Saved",
-      description: "Add videos to 'Watch Later' and never miss out.",
-      type: "YouTube",
-      icon: <Image src={Youtube} alt="Youtube" className="w-5 h-5" />,
-    },
-    {
-      id: 3,
-      image: "/images/tiktok-favorited.png",
-      title: "TikTok Favorited",
-      description: "Keep your favorite TikToks in one place.",
-      type: "TikTok",
-      icon: <PlayCircle className="w-4 h-4" />,
-    },
-  ];
 
   return (
     <div className="min-h-screen bg-white">
