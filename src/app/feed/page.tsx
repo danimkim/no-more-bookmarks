@@ -26,7 +26,7 @@ export default async function FeedPage() {
         </header>
 
         {/* Main Content */}
-        <main className="max-w-4xl mx-auto px-4 pb-20 md:pb-0">
+        <main className="max-w-4xl mx-auto px-4 pb-20 md:pb-0 relative">
           {/* Profile Section */}
           <div className="py-8">
             <div className="flex flex-col md:flex-row items-center md:items-start space-y-6 md:space-y-0 md:space-x-8">
@@ -80,7 +80,6 @@ export default async function FeedPage() {
               </div>
             </div>
           </div>
-
           {/* Error States */}
           {(error || profileError) && (
             <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-8">
@@ -140,6 +139,20 @@ export default async function FeedPage() {
         </main>
 
         <BottomNavbar />
+
+        {/* Floating Action Button - Medium screens and up */}
+        <div className="hidden md:block fixed inset-0 pointer-events-none z-50">
+          <div className="max-w-4xl mx-auto px-4 h-full relative">
+            <Link href="/create" className="pointer-events-auto">
+              <Button
+                size="icon"
+                className="absolute bottom-8 right-0 h-14 w-14 rounded-full shadow-lg hover:shadow-xl transition-shadow"
+              >
+                <Plus className="h-6 w-6" />
+              </Button>
+            </Link>
+          </div>
+        </div>
       </div>
     </ProtectedRoute>
   );
