@@ -1,16 +1,46 @@
+"use client";
+
 import { Button } from "@/src/components/ui/button";
 import { Plus } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { ProtectedRoute } from "@/src/components/ProtectedRoute";
-import { getPosts, getUserProfile } from "@/src/lib/posts";
 import { PhotoTile } from "@/src/components/PhotoTile";
 import { BottomNavbar } from "@/src/components/BottomNavbar";
 import { SettingsDrawer } from "@/src/components/SettingsDrawer";
+import { useEffect, useState } from "react";
+import { Post, UserProfile } from "@/src/lib/posts";
 
-export default async function FeedPage() {
-  const { posts, error } = await getPosts();
-  const { profile, error: profileError } = await getUserProfile();
+export default function FeedPage() {
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [profileError, setProfileError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function fetchData() {
+      const [postsRes, profileRes] = await Promise.all([
+        fetch("/api/posts"),
+        fetch("/api/profile"),
+      ]);
+
+      const postsResult = await postsRes.json();
+      if (postsResult.success) {
+        setPosts(postsResult.data);
+      } else {
+        setError(postsResult.error || "Failed to fetch posts");
+      }
+
+      const profileResult = await profileRes.json();
+      if (profileResult.success) {
+        setProfile(profileResult.data);
+      } else {
+        setProfileError(profileResult.error || "Failed to fetch profile");
+      }
+    }
+
+    fetchData();
+  }, []);
 
   return (
     <ProtectedRoute>

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/src/lib/supabase/server";
+import { generateSignedImageUrl } from "@/src/lib/signed-url-generator";
 
 export async function POST(request: NextRequest) {
   try {
@@ -198,9 +199,16 @@ export async function GET() {
       );
     }
 
+    const postsWithSignedUrls = await Promise.all(
+      (posts || []).map(async (post) => ({
+        ...post,
+        images: await generateSignedImageUrl(supabase, post.images),
+      }))
+    );
+
     return NextResponse.json({
       success: true,
-      data: posts
+      data: postsWithSignedUrls,
     });
 
   } catch (error) {

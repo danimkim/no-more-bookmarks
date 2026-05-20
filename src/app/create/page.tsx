@@ -348,8 +348,8 @@ export default function CreatePostPage() {
                       {postOperations.loading
                         ? "Publishing..."
                         : imageUpload.uploading
-                        ? "Uploading..."
-                        : "Publish Post"}
+                          ? "Uploading..."
+                          : "Publish Post"}
                     </Button>
                     <Button
                       type="button"
